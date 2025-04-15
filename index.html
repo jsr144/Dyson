@@ -644,32 +644,37 @@
     </div>
 
     <script>
+        // --- Constants ---
+        const LOCAL_STORAGE_KEY = 'cosmicFacts'; // Key for localStorage
+        const MAX_PANELS = 12; // Max panels for visualization
+        const STARTER_FACTS = [ // Default facts if localStorage is empty
+            { text: "Our sun makes enough energy in 1 second for humanity's needs for 500,000 years!", name: "Mary", isFact: true },
+            { text: "Could Dyson Spheres create artificial habitats?", name: "Science Friend", isFact: false },
+            { text: "What if we connected Dyson Spheres around multiple stars?", name: "Cosmic Explorer", isFact: false },
+            { text: "A space elevator could make building cheaper!", name: "Space Engineer", isFact: false }
+        ];
+
+
         // --- State Variables ---
         let score = 0;
-        let currentResources = 100; // Renamed from 'resources'
+        let currentResources = 100;
         let energyCollected = 0;
         let userName = "Explorer"; // Default name
         let buildAllocations = {
-            satellites: 0,
-            energy: 0,
-            transmission: 0,
-            stability: 0
+            satellites: 0, energy: 0, transmission: 0, stability: 0
         };
-        const MAX_PANELS = 12; // Max panels for visualization
-
         // Keep track of answered questions and submitted responses for each section
         let sectionState = {
             'concept': { answered: false, submitted: false },
             'feasibility': { answered: false, submitted: false },
             'importance': { answered: false, submitted: false },
-            'build': { submitted: false }, // No question, just submission
+            'build': { submitted: false },
             'final': { submitted: false }
         };
-
-        // Store all collected responses/facts
+        // Store all collected responses/facts - ** Loaded from localStorage **
         let collectedResponses = [];
 
-        // --- DOM Elements ---
+        // --- DOM Elements (cache them) ---
         const scoreDisplay = document.getElementById('score');
         const progressBar = document.getElementById('progressBar');
         const factWall = document.getElementById('fact-wall');
@@ -679,31 +684,73 @@
         const finalScoreDisplay = document.getElementById('final-score');
         const finalEnergyDisplay = document.getElementById('final-energy');
         const resourcesBuildDisplay = document.getElementById('resources-build');
-        const resourcesBuildCounter = document.getElementById('resources-build-display'); // Span in the intro text
+        const resourcesBuildCounter = document.getElementById('resources-build-display');
         const energyCollectedDisplay = document.getElementById('energy-collected');
         const confettiContainer = document.getElementById('confettiContainer');
 
+        // --- localStorage Functions ---
+        function loadFactsFromStorage() {
+            const storedFacts = localStorage.getItem(LOCAL_STORAGE_KEY);
+            if (storedFacts) {
+                try {
+                    // Attempt to parse stored data
+                    const parsedFacts = JSON.parse(storedFacts);
+                    // Basic validation: check if it's an array
+                    if (Array.isArray(parsedFacts)) {
+                        return parsedFacts;
+                    } else {
+                        console.warn("Stored facts data is not an array. Resetting to defaults.");
+                        return [...STARTER_FACTS]; // Return a copy
+                    }
+                } catch (error) {
+                    console.error("Error parsing stored facts:", error, "Resetting to defaults.");
+                    return [...STARTER_FACTS]; // Return a copy on error
+                }
+            }
+            // If nothing is stored, return default starter facts
+            return [...STARTER_FACTS]; // Return a copy
+        }
+
+        function saveFactsToStorage() {
+            try {
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(collectedResponses));
+            } catch (error) {
+                 console.error("Error saving facts to localStorage:", error);
+                 // Handle potential storage errors (e.g., quota exceeded) if necessary
+            }
+        }
+
+        function clearStoredFacts() {
+            localStorage.removeItem(LOCAL_STORAGE_KEY);
+        }
+
+
         // --- Initial Setup ---
         window.onload = function() {
-            // Add starter facts only once on initial load
-            if (collectedResponses.length === 0) {
-                const starterFacts = [
-                    { text: "Our sun makes enough energy in 1 second for humanity's needs for 500,000 years!", name: "Mary", isFact: true },
-                    { text: "Could Dyson Spheres create artificial habitats?", name: "Science Friend", isFact: false },
-                    { text: "What if we connected Dyson Spheres around multiple stars?", name: "Cosmic Explorer", isFact: false },
-                    { text: "A space elevator could make building cheaper!", name: "Space Engineer", isFact: false }
-                ];
-                starterFacts.forEach(fact => {
-                    collectedResponses.push(fact); // Add to internal array
-                    addFactToWall(fact.text, fact.name, fact.isFact); // Add to visible wall
-                });
-            }
+            // Load facts from localStorage or use defaults
+            collectedResponses = loadFactsFromStorage();
+
+            // Save the initial state (either loaded or default) back to storage
+            // This ensures defaults are saved on the very first run
+            saveFactsToStorage();
+
+            // Populate the visible wall from the loaded/initialized data
+            populateFactWall();
+
+            // Initialize other UI elements
             updateScoreDisplay();
-            updateBuildResourcesDisplay(); // Initialize build resource display
+            updateBuildResourcesDisplay();
             showSection('intro'); // Start at intro
         };
 
         // --- Core Functions ---
+
+        function populateFactWall() {
+            factWall.innerHTML = ''; // Clear the wall first
+            // Add facts from the collectedResponses array
+            collectedResponses.forEach(fact => addFactToWall(fact.text, fact.name, fact.isFact));
+        }
+
 
         function showSection(sectionId) {
             document.querySelectorAll('.game-section').forEach(section => {
@@ -714,9 +761,8 @@
                 element.classList.add('active');
             } else {
                 console.error("Section not found:", sectionId);
-                return; // Exit if section doesn't exist
+                return;
             }
-
 
             // Update progress bar
             const sections = ['intro', 'concept', 'feasibility', 'importance', 'build', 'conclusion'];
@@ -724,93 +770,88 @@
             const progressPercent = (currentIndex / (sections.length - 1)) * 100;
             progressBar.style.width = progressPercent + '%';
 
-            // Update visual containers based on current section (clear previous, add current)
+            // Update visual containers
             updateCosmicVisuals(sectionId);
 
-             // If entering build section, ensure resource display is correct
+            // If entering build section, sync resource display and button states
             if (sectionId === 'build') {
                 updateBuildResourcesDisplay();
-                updateBuildButtons(); // Check button states
+                updateBuildButtons();
             }
+
+             // If entering conclusion, ensure the wall reflects the latest data
+             if (sectionId === 'conclusion') {
+                 finalizeResults(); // This function now also repopulates the wall
+             }
         }
 
         function updateScoreDisplay() {
             scoreDisplay.textContent = score;
             scoreDisplay.classList.add('resource-animation');
-            setTimeout(() => scoreDisplay.classList.remove('resource-animation'), 500); // Pulse effect
+            setTimeout(() => scoreDisplay.classList.remove('resource-animation'), 500);
         }
 
         function updateBuildResourcesDisplay() {
             resourcesBuildDisplay.textContent = currentResources;
-            resourcesBuildCounter.textContent = currentResources; // Update the span too
+            resourcesBuildCounter.textContent = currentResources;
             resourcesBuildDisplay.classList.add('resource-animation');
             setTimeout(() => resourcesBuildDisplay.classList.remove('resource-animation'), 500);
         }
 
          function updateEnergyCollectedDisplay() {
-            // Simple calculation based on allocations (adjust weights as needed)
             let calculatedEnergy = Math.min(100,
                 (buildAllocations.satellites * 3) +
                 (buildAllocations.energy * 5) +
                 (buildAllocations.transmission * 2) +
-                (buildAllocations.stability * 1) // Stability contributes less directly
+                (buildAllocations.stability * 1)
             );
-            energyCollected = Math.round(calculatedEnergy); // Keep as integer percentage
+            energyCollected = Math.round(calculatedEnergy);
             energyCollectedDisplay.textContent = energyCollected + '%';
         }
 
 
         function selectOption(element, questionId, isCorrect) {
-            if (sectionState[questionId].answered) return; // Prevent re-answering
-
-            sectionState[questionId].answered = true; // Mark as answered
+            if (sectionState[questionId].answered) return;
+            sectionState[questionId].answered = true;
 
             const feedbackElement = document.getElementById(`${questionId}-feedback`);
             const optionsContainer = document.getElementById(`${questionId}-options`);
             const responseForm = document.getElementById(`${questionId}-response`);
             const nextButton = document.getElementById(`${questionId}-next`);
 
-            // Disable all options in this section
             optionsContainer.querySelectorAll('.option').forEach(opt => {
-                opt.onclick = null; // Remove click listener
-                opt.classList.add('disabled'); // Style as disabled
-                if (opt !== element) {
-                     opt.style.opacity = '0.6'; // Dim unselected options
-                }
+                opt.onclick = null;
+                opt.classList.add('disabled');
+                if (opt !== element) opt.style.opacity = '0.6';
             });
 
-
-            element.classList.add('selected'); // Mark the chosen option
+            element.classList.add('selected');
 
             if (isCorrect) {
-                score += 10; // Award points for correct answer
+                score += 10;
                 element.classList.add('correct');
                 feedbackElement.innerHTML = `<p><strong>Correct!</strong> ${getFeedbackText(questionId, true)}</p>`;
-                feedbackElement.className = 'feedback correct'; // Show correct feedback style
+                feedbackElement.className = 'feedback correct';
             } else {
-                score += 2; // Award fewer points for trying
+                score += 2;
                 element.classList.add('incorrect');
                 feedbackElement.innerHTML = `<p><strong>Not quite!</strong> ${getFeedbackText(questionId, false)}</p>`;
-                feedbackElement.className = 'feedback incorrect'; // Show incorrect feedback style
-
-                // Highlight the correct answer
-                 optionsContainer.querySelectorAll('.option').forEach(opt => {
-                    // Find the correct option based on its original onclick attribute content
+                feedbackElement.className = 'feedback incorrect';
+                optionsContainer.querySelectorAll('.option').forEach(opt => {
                     const onclickAttr = opt.getAttribute('onclick');
                     if (onclickAttr && onclickAttr.includes(', true)')) {
-                         opt.classList.add('correct'); // Highlight the actual correct answer
-                         opt.style.opacity = '1'; // Ensure correct answer is fully visible
+                         opt.classList.add('correct');
+                         opt.style.opacity = '1';
                     }
                  });
             }
 
             updateScoreDisplay();
-            responseForm.style.display = 'block'; // Show the thought-sharing form
-            nextButton.style.display = 'inline-block'; // Show the next button
+            responseForm.style.display = 'block';
+            nextButton.style.display = 'inline-block';
         }
 
         function getFeedbackText(questionId, isCorrect) {
-            // Concise feedback messages
             switch (questionId) {
                 case 'concept':
                     return isCorrect
@@ -824,13 +865,13 @@
                     return isCorrect
                         ? "Right! It represents the ultimate energy goal for advanced civilizations and could be a sign of alien life (technosignature)."
                         : "The main idea is capturing nearly ALL a star's energy. It's also a potential 'technosignature' – a sign of advanced alien tech.";
-                default:
-                    return "";
+                default: return "";
             }
         }
 
         function submitResponse(sectionId) {
-            if (sectionState[sectionId].submitted) return; // Prevent multiple submissions
+            // Allow multiple submissions in 'build' section, but only one in others
+            if (sectionId !== 'build' && sectionState[sectionId].submitted) return;
 
             const thoughtInput = document.getElementById(`${sectionId}-thought`);
             const isNotFactCheckbox = document.getElementById(`${sectionId}-fact-check`);
@@ -838,28 +879,29 @@
             const isNotFact = isNotFactCheckbox.checked;
 
             if (thoughtText) {
-                 // Use current nameInput value if available, otherwise default
-                const currentName = nameInput.value.trim() || userName;
+                const currentName = nameInput.value.trim() || userName; // Use entered name if available
                 const newEntry = { text: thoughtText, name: currentName, isFact: !isNotFact };
-                collectedResponses.push(newEntry);
-                addFactToWall(newEntry.text, newEntry.name, newEntry.isFact);
 
-                thoughtInput.value = ''; // Clear input
-                isNotFactCheckbox.checked = false; // Reset checkbox
-                sectionState[sectionId].submitted = true; // Mark as submitted
+                // Add to the start of the array (newest first)
+                collectedResponses.unshift(newEntry);
+                addFactToWall(newEntry.text, newEntry.name, newEntry.isFact); // Add visually
+                saveFactsToStorage(); // <<-- SAVE TO LOCALSTORAGE
 
-                // Provide feedback to the user
-                const submitButton = thoughtInput.parentElement.querySelector('.btn-submit');
+                thoughtInput.value = '';
+                isNotFactCheckbox.checked = false;
+                sectionState[sectionId].submitted = true; // Mark section as submitted (except build)
+
+                const submitButton = thoughtInput.closest('.form-group').querySelector('.btn-submit');
                  if (submitButton) {
+                    const originalText = submitButton.textContent; // Store original text
                     submitButton.textContent = 'Added!';
-                    submitButton.disabled = true;
+                    submitButton.disabled = (sectionId !== 'build'); // Only disable if not build section
                     setTimeout(() => {
-                         // Reset button after a delay, only if needed (e.g., if user can submit more)
-                         // In this flow, usually one submission per section is fine.
+                         // Reset button text, keep disabled state based on section
+                         submitButton.textContent = originalText;
                     }, 1500);
                  }
 
-                 // Award points for contributing
                  score += 5;
                  updateScoreDisplay();
 
@@ -873,21 +915,21 @@
             const li = document.createElement('li');
             li.innerHTML = `${text} <span class="fact-attribution">- ${name} ${isFact ? '(Fact)' : '(Thought/Idea)'}</span>`;
              if (!isFact) {
-                li.classList.add('not-fact'); // Add class for styling non-facts
+                li.classList.add('not-fact');
              }
-            // Prepend to show newest first
+            // Prepend to show newest first visually
             factWall.insertBefore(li, factWall.firstChild);
         }
 
         function allocateResources(type, cost) {
             if (currentResources >= cost) {
                 currentResources -= cost;
-                buildAllocations[type]++; // Increment allocation count for this type
+                buildAllocations[type]++;
                 updateBuildResourcesDisplay();
                 updateEnergyCollectedDisplay();
-                updateBuildButtons(); // Disable buttons if needed
-                addPanelToVisual(); // Add a visual representation
-                score += Math.round(cost / 5); // Award points based on cost
+                updateBuildButtons();
+                addPanelToVisual();
+                score += Math.round(cost / 5);
                 updateScoreDisplay();
             } else {
                 alert("Not enough Curiosity Points!");
@@ -896,14 +938,16 @@
 
          function updateBuildButtons() {
             document.querySelectorAll('.build-btn').forEach(button => {
-                const cost = parseInt(button.textContent.match(/-(\d+)/)[1]); // Extract cost
-                if (currentResources < cost) {
-                    button.disabled = true;
+                const costText = button.textContent.match(/-(\d+)/); // Find cost in button text
+                if (costText && costText[1]) {
+                    const cost = parseInt(costText[1]);
+                    button.disabled = currentResources < cost;
                 } else {
-                    button.disabled = false;
+                    button.disabled = false; // Default to enabled if cost not found
                 }
             });
         }
+
 
         function submitFinalThought() {
              if (sectionState.final.submitted) return;
@@ -917,49 +961,52 @@
                  alert("Please enter your name!");
                  return;
              }
-             userName = finalName; // Update global name
-             displayName.textContent = userName; // Update display name on page
+             userName = finalName;
+             displayName.textContent = userName;
 
              if (finalThoughtText) {
                  const newEntry = { text: finalThoughtText, name: userName, isFact: !isNotFact };
-                 collectedResponses.push(newEntry);
-                 addFactToWall(newEntry.text, newEntry.name, newEntry.isFact);
-                 finalThoughtInput.value = ''; // Clear input
+                 collectedResponses.unshift(newEntry); // Add to start
+                 addFactToWall(newEntry.text, newEntry.name, newEntry.isFact); // Add visually
+                 saveFactsToStorage(); // <<-- SAVE TO LOCALSTORAGE
+                 finalThoughtInput.value = '';
                  isNotFactCheckbox.checked = false;
              }
 
-             // Mark final section as submitted and update button
              sectionState.final.submitted = true;
-             const submitButton = finalThoughtInput.parentElement.querySelector('.btn-submit');
+             const submitButton = finalThoughtInput.closest('.form-group').querySelector('.btn-submit');
              if (submitButton) {
                  submitButton.textContent = "Submitted!";
                  submitButton.disabled = true;
              }
-             startConfetti(); // Celebrate!
+             startConfetti();
         }
 
         function finalizeResults() {
             finalScoreDisplay.textContent = score;
             finalEnergyDisplay.textContent = energyCollected + '%';
-            displayName.textContent = nameInput.value.trim() || userName; // Update name display
+            displayName.textContent = nameInput.value.trim() || userName;
 
-             // Refresh the wall with all collected responses using the final name if provided
-             factWall.innerHTML = ''; // Clear existing wall
-             collectedResponses.forEach(entry => {
-                 // Use the final name for entries submitted before name was entered, if desired
-                 // const displayNameForEntry = (entry.name === "Explorer" && userName !== "Explorer") ? userName : entry.name;
-                 addFactToWall(entry.text, entry.name, entry.isFact);
-             });
+             // Refresh the wall from the current (potentially updated) collectedResponses
+             populateFactWall();
         }
 
 
         function restartGame() {
+            // --- Clear persistent storage ---
+            clearStoredFacts();
+
+            // --- Reset state variables ---
             score = 0;
             currentResources = 100;
             energyCollected = 0;
             userName = "Explorer";
             buildAllocations = { satellites: 0, energy: 0, transmission: 0, stability: 0 };
-            collectedResponses = []; // Clear collected responses
+             // Reset collected responses to starter facts
+            collectedResponses = [...STARTER_FACTS]; // Use a copy
+            // Save the reset state (starter facts) back to storage
+            saveFactsToStorage();
+
             sectionState = { // Reset section states
                  'concept': { answered: false, submitted: false },
                  'feasibility': { answered: false, submitted: false },
@@ -968,7 +1015,7 @@
                  'final': { submitted: false }
             };
 
-            // Reset UI elements
+            // --- Reset UI elements ---
             updateScoreDisplay();
             updateBuildResourcesDisplay();
             updateEnergyCollectedDisplay();
@@ -980,26 +1027,25 @@
             document.getElementById('build-fact-check').checked = false;
 
 
-            // Reset question sections
+            // Reset question sections UI
             ['concept', 'feasibility', 'importance'].forEach(id => {
                 document.getElementById(`${id}-feedback`).style.display = 'none';
+                document.getElementById(`${id}-feedback`).innerHTML = ''; // Clear feedback text
                 document.getElementById(`${id}-response`).style.display = 'none';
                 document.getElementById(`${id}-next`).style.display = 'none';
                 document.getElementById(`${id}-thought`).value = '';
-                 document.getElementById(`${id}-fact-check`).checked = false;
+                document.getElementById(`${id}-fact-check`).checked = false;
+
                 const optionsContainer = document.getElementById(`${id}-options`);
                 optionsContainer.querySelectorAll('.option').forEach(opt => {
                     opt.classList.remove('selected', 'correct', 'incorrect', 'disabled');
                     opt.style.opacity = '1';
-                    // Re-attach original onclick - NOTE: This is simple; complex scenarios might need storing/restoring handlers
-                    const originalOnclick = opt.getAttribute('data-original-onclick'); // Need to store this initially if dynamically generated
-                    if (originalOnclick) opt.setAttribute('onclick', originalOnclick);
-                    else { // Fallback: Reconstruct based on structure (less robust)
-                        const args = opt.getAttribute('onclick').match(/'([^']*)',\s*(true|false)/);
-                        if (args) opt.setAttribute('onclick', `selectOption(this, '${args[1]}', ${args[2]})`);
-                    }
+                     // Basic re-attachment of click handler (assumes simple structure)
+                     const args = opt.getAttribute('onclick')?.match(/'([^']*)',\s*(true|false)/);
+                     if (args) {
+                         opt.onclick = () => selectOption(opt, args[1], args[2] === 'true');
+                     }
                 });
-                 // Reset submit buttons in these sections
                  const submitBtn = document.getElementById(`${id}-response`).querySelector('.btn-submit');
                  if (submitBtn) {
                     submitBtn.textContent = 'Add to Collection';
@@ -1007,83 +1053,65 @@
                  }
             });
 
-             // Reset build section buttons and visuals
+             // Reset build section UI
              updateBuildButtons();
-             clearCosmicVisuals('buildContainer'); // Clear build visuals
+             clearCosmicVisuals('buildContainer');
              const buildSubmitBtn = document.getElementById('build-response').querySelector('.btn-submit');
              if (buildSubmitBtn) {
                  buildSubmitBtn.textContent = 'Add to Wall of Facts';
-                 buildSubmitBtn.disabled = false;
+                 buildSubmitBtn.disabled = false; // Re-enable build submit
              }
 
-
-             // Reset final section submit button
+             // Reset final section UI
              const finalSubmitBtn = document.getElementById('conclusion').querySelector('.btn-submit');
              if (finalSubmitBtn) {
                  finalSubmitBtn.textContent = 'Submit & Celebrate!';
                  finalSubmitBtn.disabled = false;
              }
 
-
-            // Clear and re-populate wall with starter facts
-            factWall.innerHTML = '';
-             window.onload(); // Re-run onload to repopulate starter facts and display
-
+            // --- Refresh Wall and Start Over ---
+            populateFactWall(); // Re-populate wall with starter facts
             stopConfetti();
-            showSection('intro'); // Go back to start
+            showSection('intro');
         }
 
 
         // --- Visual Effect Functions ---
 
         function updateCosmicVisuals(sectionId) {
-            // Clear all containers first
             ['conceptContainer', 'feasibilityContainer', 'importanceContainer', 'buildContainer'].forEach(clearCosmicVisuals);
-
-            // Add visuals specific to the current section's container
             const container = document.getElementById(`${sectionId}Container`);
-            if (!container) return; // Only proceed if container exists
+            if (!container) return;
 
-            if (sectionId === 'concept') {
-                // Basic star
-            } else if (sectionId === 'feasibility') {
-                addCosmicRing(container); // Show the ring
-            } else if (sectionId === 'importance') {
-                addCosmicRing(container);
-                addMorePanels(container, 5); // Show ring and a few panels
-            } else if (sectionId === 'build') {
-                 completeDysonSwarmVisual(container); // Show based on allocations
-            }
+            if (sectionId === 'concept') { /* Basic star */ }
+            else if (sectionId === 'feasibility') addCosmicRing(container);
+            else if (sectionId === 'importance') { addCosmicRing(container); addMorePanels(container, 5); }
+            else if (sectionId === 'build') completeDysonSwarmVisual(container);
         }
 
         function clearCosmicVisuals(containerId) {
              const container = document.getElementById(containerId);
              if (container) {
-                 // Remove all elements except the star
                  const elementsToRemove = container.querySelectorAll('.cosmic-ring, .cosmic-panel');
                  elementsToRemove.forEach(el => el.remove());
              }
         }
 
-
         function addCosmicRing(targetContainer = document.getElementById('feasibilityContainer')) {
              if (!targetContainer) return;
-             clearCosmicVisuals(targetContainer.id); // Clear previous elements first
+             clearCosmicVisuals(targetContainer.id);
              const ring = document.createElement('div');
              ring.className = 'cosmic-ring';
              targetContainer.appendChild(ring);
-             // Trigger reflow to apply transition
-             void ring.offsetWidth;
+             void ring.offsetWidth; // Trigger reflow
              ring.style.opacity = '1';
         }
 
         function addMorePanels(targetContainer = document.getElementById('importanceContainer'), count = 5) {
              if (!targetContainer) return;
-             // Ensure ring exists if needed for this stage
-             if (!targetContainer.querySelector('.cosmic-ring')) {
-                 addCosmicRing(targetContainer);
-             }
-             const radius = 100; // Radius for panel placement
+             if (!targetContainer.querySelector('.cosmic-ring')) addCosmicRing(targetContainer);
+
+             const radius = 100;
              for (let i = 0; i < count; i++) {
                  const angle = (i / count) * 2 * Math.PI;
                  const x = radius * Math.cos(angle);
@@ -1092,89 +1120,70 @@
                  panel.className = 'cosmic-panel';
                  panel.style.transform = `translate(${x}px, ${y}px) rotate(${angle + Math.PI / 2}rad)`;
                  targetContainer.appendChild(panel);
-                 // Trigger reflow and fade in
-                 void panel.offsetWidth;
-                 panel.style.opacity = '0.7'; // Make panels slightly transparent
+                 void panel.offsetWidth; // Trigger reflow
+                 panel.style.opacity = '0.7';
              }
         }
 
          function addPanelToVisual() {
              const container = document.getElementById('buildContainer');
              if (!container) return;
-
              const panelCount = container.querySelectorAll('.cosmic-panel').length;
-             if (panelCount >= MAX_PANELS) return; // Limit number of visual panels
+             if (panelCount >= MAX_PANELS) return;
 
              const radius = 100;
-             const angle = (panelCount / MAX_PANELS) * 2 * Math.PI + Math.random() * 0.5 - 0.25; // Add randomness
+             const angle = (panelCount / MAX_PANELS) * 2 * Math.PI + Math.random() * 0.5 - 0.25;
              const x = radius * Math.cos(angle);
              const y = radius * Math.sin(angle);
 
              const panel = document.createElement('div');
              panel.className = 'cosmic-panel';
-             panel.style.transform = `translate(${x}px, ${y}px) rotate(${angle + Math.PI / 2}rad) scale(0.1)`; // Start small
+             panel.style.transform = `translate(${x}px, ${y}px) rotate(${angle + Math.PI / 2}rad) scale(0.1)`;
              panel.style.opacity = '0';
              container.appendChild(panel);
 
-             // Animate in
              setTimeout(() => {
                  panel.style.opacity = '0.8';
                  panel.style.transform = `translate(${x}px, ${y}px) rotate(${angle + Math.PI / 2}rad) scale(1)`;
-             }, 50); // Short delay before animating
+             }, 50);
          }
-
 
         function completeDysonSwarmVisual(targetContainer = document.getElementById('buildContainer')) {
             if (!targetContainer) return;
-            clearCosmicVisuals(targetContainer.id); // Clear previous
-            addCosmicRing(targetContainer); // Add the ring back
-
-            // Add panels based on current allocations
+            clearCosmicVisuals(targetContainer.id);
+            addCosmicRing(targetContainer);
             const totalAllocations = Object.values(buildAllocations).reduce((sum, val) => sum + val, 0);
-            const numPanels = Math.min(MAX_PANELS, Math.ceil(totalAllocations / 2)); // Example logic: more allocations = more panels
-
+            const numPanels = Math.min(MAX_PANELS, Math.ceil(totalAllocations / 2));
             addMorePanels(targetContainer, numPanels);
         }
 
-
         // --- Confetti Functions ---
         let confettiInterval = null;
-
         function startConfetti() {
-            stopConfetti(); // Clear any existing confetti
-            createConfettiPiece(); // Create initial pieces
-            confettiInterval = setInterval(createConfettiPiece, 100); // Add more over time
-            // Stop after a while
-             setTimeout(stopConfetti, 5000);
+            stopConfetti();
+            createConfettiPiece();
+            confettiInterval = setInterval(createConfettiPiece, 100);
+            setTimeout(stopConfetti, 5000);
         }
-
         function stopConfetti() {
             clearInterval(confettiInterval);
             confettiInterval = null;
-             // Optional: remove existing confetti elements after a delay
-             setTimeout(() => {
-                 confettiContainer.innerHTML = '';
-             }, 3000); // Wait for existing ones to fall
+            setTimeout(() => { confettiContainer.innerHTML = ''; }, 3000);
         }
-
         function createConfettiPiece() {
-             if (!confettiContainer) return; // Ensure container exists
+             if (!confettiContainer) return;
              const confetti = document.createElement('div');
-             const randomClass = `c${Math.floor(Math.random() * 5)}`; // c0, c1, c2, c3, c4
+             const randomClass = `c${Math.floor(Math.random() * 5)}`;
              confetti.className = `confetti ${randomClass}`;
-             confetti.style.left = `${Math.random() * 100}vw`; // Start at random horizontal position
-             confetti.style.animationDelay = `${Math.random() * 2}s`; // Random start delay
-             confetti.style.transform = `rotate(${Math.random() * 360}deg)`; // Random initial rotation
+             confetti.style.left = `${Math.random() * 100}vw`;
+             confetti.style.animationDelay = `${Math.random() * 2}s`;
+             confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
              confettiContainer.appendChild(confetti);
-
-             // Remove confetti element after animation ends (approx 4s + delay)
-             setTimeout(() => {
-                 confetti.remove();
-             }, 5000);
+             setTimeout(() => { confetti.remove(); }, 5000);
         }
-
 
     </script>
 </body>
 </html>
+
 
