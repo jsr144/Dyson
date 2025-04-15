@@ -3,22 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dyson Sphere Explorer: A Cosmic Engineering Adventure</title>
+    <title>Cosmic Curiosity Explorer: For Mary's Science Fair Birthday!</title>
     <style>
         :root {
-            --primary: #2c3e50;
-            --secondary: #3498db;
-            --accent: #e74c3c;
-            --light: #ecf0f1;
-            --dark: #1a202c;
-            --success: #2ecc71;
+            --primary: #6d28d9;
+            --secondary: #ec4899;
+            --accent: #f59e0b;
+            --light: #fdf2f8;
+            --dark: #1e1b4b;
+            --success: #10b981;
+            --info: #3b82f6;
         }
         
         body {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
             line-height: 1.6;
             color: var(--dark);
             background-color: var(--light);
+            background-image: linear-gradient(120deg, #fdf2f8 0%, #e0f2fe 100%);
             margin: 0;
             padding: 0;
             min-height: 100vh;
@@ -33,29 +35,51 @@
             margin: 2rem auto;
             padding: 2rem;
             background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 20px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            border: 3px dashed var(--secondary);
         }
         
         h1, h2, h3 {
             color: var(--primary);
             font-weight: 700;
+            text-align: center;
         }
         
         h1 {
-            text-align: center;
             margin-bottom: 1.5rem;
-            font-size: 2.2rem;
+            font-size: 2.4rem;
+            background: linear-gradient(120deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         
         h2 {
             margin-top: 1.5rem;
             margin-bottom: 1rem;
-            font-size: 1.6rem;
+            font-size: 1.8rem;
+            color: var(--secondary);
         }
         
         p {
             margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+        
+        .birthday-banner {
+            text-align: center;
+            padding: 1rem;
+            background-color: rgba(236, 72, 153, 0.1);
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .birthday-banner p {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--secondary);
+            margin: 0;
         }
         
         .game-section {
@@ -78,29 +102,38 @@
             border: none;
             padding: 0.75rem 1.5rem;
             margin: 0.5rem 0.25rem;
-            border-radius: 4px;
+            border-radius: 50px;
             font-size: 1rem;
             cursor: pointer;
-            transition: background-color 0.3s, transform 0.2s;
+            transition: all 0.3s;
+            font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         
         .btn:hover {
-            background-color: #2980b9;
-            transform: translateY(-2px);
+            background-color: var(--primary);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
         }
         
         .btn-next {
-            background-color: var(--secondary);
+            background-color: var(--accent);
             float: right;
         }
         
         .btn-prev {
-            background-color: var(--primary);
+            background-color: var(--info);
             float: left;
         }
         
+        .btn-submit {
+            background-color: var(--success);
+            display: block;
+            margin: 1rem auto;
+        }
+        
         .btn-restart {
-            background-color: var(--accent);
+            background-color: var(--primary);
             display: block;
             margin: 1rem auto;
         }
@@ -116,48 +149,51 @@
             flex-basis: 48%;
             padding: 1rem;
             margin-bottom: 1rem;
-            background-color: #f8f9fa;
-            border: 2px solid #e9ecef;
-            border-radius: 5px;
+            background-color: rgba(59, 130, 246, 0.1);
+            border: 2px solid rgba(59, 130, 246, 0.3);
+            border-radius: 15px;
             cursor: pointer;
             transition: all 0.3s;
         }
         
         .option:hover {
-            background-color: #e9ecef;
-            border-color: var(--secondary);
+            background-color: rgba(59, 130, 246, 0.2);
+            border-color: var(--info);
+            transform: translateY(-3px);
         }
         
         .option.selected {
-            background-color: rgba(52, 152, 219, 0.2);
+            background-color: rgba(236, 72, 153, 0.2);
             border-color: var(--secondary);
         }
         
         .option.correct {
-            background-color: rgba(46, 204, 113, 0.2);
+            background-color: rgba(16, 185, 129, 0.2);
             border-color: var(--success);
         }
         
         .option.incorrect {
-            background-color: rgba(231, 76, 60, 0.2);
+            background-color: rgba(245, 158, 11, 0.2);
             border-color: var(--accent);
         }
         
         .feedback {
             margin-top: 1rem;
             padding: 1rem;
-            border-radius: 5px;
+            border-radius: 15px;
             display: none;
+            background-color: rgba(236, 72, 153, 0.1);
+            border-left: 4px solid var(--secondary);
         }
         
         .feedback.correct {
-            background-color: rgba(46, 204, 113, 0.1);
+            background-color: rgba(16, 185, 129, 0.1);
             border-left: 4px solid var(--success);
             display: block;
         }
         
         .feedback.incorrect {
-            background-color: rgba(231, 76, 60, 0.1);
+            background-color: rgba(245, 158, 11, 0.1);
             border-left: 4px solid var(--accent);
             display: block;
         }
@@ -166,24 +202,16 @@
             text-align: center;
             font-size: 1.2rem;
             margin-bottom: 1rem;
+            color: var(--primary);
+            font-weight: bold;
         }
         
-        .stats-display {
-            display: flex;
-            justify-content: space-between;
-            text-align: center;
-            font-size: 0.9rem;
-            margin-bottom: 1rem;
-            background-color: rgba(52, 152, 219, 0.1);
-            padding: 0.5rem;
-            border-radius: 5px;
-        }
-        
-        .dyson-sphere-container {
+        .cosmic-sphere-container {
             position: relative;
             width: 300px;
             height: 300px;
             margin: 2rem auto;
+            perspective: 1000px;
         }
         
         .star {
@@ -198,36 +226,38 @@
             box-shadow: 0 0 30px 10px rgba(255, 193, 7, 0.6);
         }
         
-        .dyson-ring {
+        .cosmic-ring {
             position: absolute;
-            border: 6px solid rgba(52, 152, 219, 0.7);
+            border: 6px solid rgba(236, 72, 153, 0.7);
             border-radius: 50%;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) rotate(45deg);
-            box-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+            box-shadow: 0 0 10px rgba(236, 72, 153, 0.5);
             transition: all 1.5s;
+            animation: rotate 20s linear infinite;
         }
         
-        .dyson-panel {
+        .cosmic-panel {
             position: absolute;
-            background-color: rgba(52, 152, 219, 0.7);
-            border-radius: 2px;
+            background-color: rgba(109, 40, 217, 0.7);
+            border-radius: 10px;
             transform-origin: center;
-            box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+            box-shadow: 0 0 5px rgba(109, 40, 217, 0.5);
         }
         
         .progress-container {
             width: 100%;
-            background-color: #e9ecef;
-            border-radius: 5px;
+            background-color: rgba(59, 130, 246, 0.2);
+            border-radius: 50px;
             margin-bottom: 1rem;
+            overflow: hidden;
         }
         
         .progress-bar {
-            height: 10px;
-            border-radius: 5px;
-            background-color: var(--secondary);
+            height: 15px;
+            border-radius: 50px;
+            background: linear-gradient(90deg, var(--secondary), var(--primary));
             width: 0%;
             transition: width 0.5s;
         }
@@ -242,10 +272,102 @@
             font-size: 1.1rem;
             text-align: right;
             margin-bottom: 1rem;
+            color: var(--primary);
+            font-weight: bold;
         }
         
         .resource-animation {
             animation: pulse 0.5s;
+        }
+        
+        .wall-of-facts {
+            background-color: rgba(16, 185, 129, 0.1);
+            border-radius: 15px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .wall-of-facts h3 {
+            color: var(--success);
+            text-align: center;
+            border-bottom: 2px dashed var(--success);
+            padding-bottom: 0.5rem;
+        }
+        
+        .wall-of-facts ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        
+        .wall-of-facts li {
+            padding: 0.8rem;
+            margin-bottom: 0.5rem;
+            background-color: white;
+            border-radius: 10px;
+            border-left: 3px solid var(--success);
+            font-size: 0.95rem;
+        }
+        
+        .fact-attribution {
+            font-style: italic;
+            font-size: 0.8rem;
+            color: var(--primary);
+            margin-top: 0.3rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        input[type="text"], 
+        textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border-radius: 10px;
+            border: 2px solid rgba(109, 40, 217, 0.3);
+            font-family: inherit;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus, 
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .input-hint {
+            font-size: 0.8rem;
+            color: var(--secondary);
+            margin-top: 0.3rem;
+        }
+        
+        .congrats-container {
+            text-align: center;
+            margin: 2rem 0;
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: var(--secondary);
+            border-radius: 50%;
+            animation: confetti-fall 5s linear infinite;
         }
         
         @keyframes pulse {
@@ -254,196 +376,307 @@
             100% { transform: scale(1); }
         }
         
-        .congratulations {
-            text-align: center;
-            margin: 2rem 0;
+        @keyframes rotate {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
         }
         
-        .congratulations h2 {
-            color: var(--success);
+        @keyframes confetti-fall {
+            0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
         }
         
-        /* Animation for panels */
-        @keyframes rotatePanel {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin-top: 1rem;
+        }
+        
+        .checkbox-container input[type="checkbox"] {
+            margin-right: 0.5rem;
+            width: 18px;
+            height: 18px;
+        }
+        
+        .checkbox-label {
+            font-size: 0.9rem;
+            color: var(--primary);
+        }
+        
+        .sparkle {
+            display: inline-block;
+            animation: sparkle 2s infinite;
+        }
+        
+        @keyframes sparkle {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .mary-says {
+            background-color: rgba(236, 72, 153, 0.1);
+            border-left: 4px solid var(--secondary);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 15px 15px 0;
+            font-style: italic;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Dyson Sphere Explorer</h1>
-        <p class="score-display">Score: <span id="score">0</span></p>
-        <div class="stats-display">
-            <div>Concept Answers: <span id="concept-count">0</span></div>
-            <div>Feasibility Answers: <span id="feasibility-count">0</span></div>
-            <div>Importance Answers: <span id="importance-count">0</span></div>
+        <div class="birthday-banner">
+            <p><span class="sparkle">✨</span> For Mary's Earth Day Birthday Science Fair! <span class="sparkle">✨</span></p>
         </div>
+        
+        <h1>Cosmic Curiosity Explorer</h1>
+        <p class="score-display">Fun Points: <span id="score">0</span></p>
         <div class="progress-container">
             <div class="progress-bar" id="progressBar"></div>
         </div>
         
         <!-- Introduction Section -->
         <div class="game-section active" id="intro">
-            <h2>Welcome, Cosmic Engineer!</h2>
-            <p>You've been selected to explore the <strong>Dyson Sphere</strong> concept - one of humanity's most ambitious ideas for harnessing stellar energy.</p>
-            <p>In this quick adventure, you'll learn:</p>
+            <h2>Welcome, Science Fair Explorer!</h2>
+            <p>Congrats! You've stumbled upon an interactive exhibit about one of the WILDEST ideas humans have ever dreamed up: the <strong>Dyson Sphere</strong>! (Or as Mary calls it, "that thing where we build a giant structure around the sun to capture ALL its energy!")</p>
+            
+            <div class="mary-says">
+                "This is the year my dreams will come true (why not?)" - Mary
+            </div>
+            
+            <p>In the spirit of Mary's Science Fair birthday celebration, this little adventure will let you:</p>
             <ul>
-                <li>What a Dyson Sphere is</li>
-                <li>If we could build one</li>
-                <li>Why this concept matters</li>
+                <li>Learn about a mind-boggling cosmic concept</li>
+                <li>Share your own thoughts and curiosities</li>
+                <li>See what others have wondered about</li>
+                <li>Contribute to our Wall of Good Facts!</li>
             </ul>
-            <p class="resource-counter">Resources: <span id="resources">100</span> units</p>
+            
+            <p class="resource-counter">Curiosity Points: <span id="resources">100</span></p>
             <div class="clearfix">
-                <button class="btn btn-next" onclick="showSection('concept')">Begin →</button>
+                <button class="btn btn-next" onclick="showSection('concept')">Let's Get Curious! →</button>
             </div>
         </div>
         
         <!-- Concept Section -->
         <div class="game-section" id="concept">
-            <h2>The Concept: What is a Dyson Sphere?</h2>
+            <h2>The Big Idea: What's a Dyson Sphere?</h2>
             
-            <div class="dyson-sphere-container">
+            <div class="cosmic-sphere-container">
                 <div class="star"></div>
-                <!-- Dyson components will be added by JavaScript -->
+                <!-- Cosmic components will be added by JavaScript -->
             </div>
             
-            <p>In 1960, Freeman Dyson proposed that advanced civilizations might build enormous structures to capture a star's energy output.</p>
-            <p>What did Dyson actually propose?</p>
+            <p>In 1960, a scientist named Freeman Dyson had a thought that was GALAXY BRAIN level. He wondered: "What if super advanced aliens built enormous structures around their stars to catch ALL the energy?"</p>
+            
+            <p>What do you think this wild concept actually looks like?</p>
             
             <div class="options">
                 <div class="option" onclick="selectOption(this, 'concept', false)">
-                    <p>A solid sphere enclosing a star</p>
+                    <p>A solid sphere completely surrounding a star (like a giant Death Star but around the sun!)</p>
                 </div>
                 <div class="option" onclick="selectOption(this, 'concept', true)">
-                    <p>A swarm of orbiting solar collectors</p>
+                    <p>A swarm of solar panels orbiting a star (like millions of space satellites!)</p>
                 </div>
                 <div class="option" onclick="selectOption(this, 'concept', false)">
-                    <p>A planet-sized energy extraction machine</p>
+                    <p>A planet-sized cosmic vacuum cleaner that sucks up star energy</p>
                 </div>
                 <div class="option" onclick="selectOption(this, 'concept', false)">
-                    <p>A space vacuum cleaner</p>
+                    <p>A magical sphere that makes stars last forever (kinda like star recycling)</p>
                 </div>
             </div>
             
             <div class="feedback" id="concept-feedback">
-                <p>While often depicted as solid shells in science fiction, Dyson actually proposed a "swarm" of orbiting structures to capture stellar energy. A solid sphere would face enormous engineering challenges and likely collapse under its own gravity.</p>
+                <p>Science fiction loves to show Dyson Spheres as giant solid shells (looking at you, Star Trek!), but Dyson actually proposed a "swarm" of orbiting structures. A solid sphere would probably collapse under its own weight—gravity is no joke!</p>
+                <p>This is the perfect example of how sci-fi and real science can inspire each other in the coolest ways.</p>
+            </div>
+            
+            <div class="form-group" id="concept-response" style="display: none;">
+                <label for="concept-thought">Share your thoughts or questions about this concept:</label>
+                <textarea id="concept-thought" placeholder="This reminds me of... / I wonder if... / Could we actually..."></textarea>
+                <p class="input-hint">This will be added to our collection of responses for Mary's Science Fair!</p>
+                
+                <div class="checkbox-container">
+                    <input type="checkbox" id="concept-fact-check">
+                    <label for="concept-fact-check" class="checkbox-label">Is this NOT a fact? (Check if you're sharing an opinion, idea, or question rather than a verified fact)</label>
+                </div>
+                
+                <button class="btn btn-submit" onclick="submitResponse('concept')">Add to the Collection</button>
             </div>
             
             <div class="clearfix">
                 <button class="btn btn-prev" onclick="showSection('intro')">← Back</button>
-                <button class="btn btn-next" id="concept-next" style="display: none;" onclick="showSection('feasibility'); addDysonRing();">Continue →</button>
+                <button class="btn btn-next" id="concept-next" style="display: none;" onclick="showSection('feasibility'); addCosmicRing();">Explore More →</button>
             </div>
         </div>
         
         <!-- Feasibility Section -->
         <div class="game-section" id="feasibility">
-            <h2>The Feasibility: Could We Build One?</h2>
+            <h2>Could We Actually Build One?</h2>
             
-            <p>What's the biggest challenge to building a Dyson Sphere or Swarm?</p>
+            <p>Let's get real for a second. If we wanted to build a Dyson Sphere or Swarm, what do you think would be the biggest obstacle?</p>
             
             <div class="options">
                 <div class="option" onclick="selectOption(this, 'feasibility', false)">
-                    <p>Finding the right star</p>
+                    <p>Finding a star that wouldn't mind being surrounded (sun permission?)</p>
                 </div>
                 <div class="option" onclick="selectOption(this, 'feasibility', false)">
-                    <p>Solar energy capture technology</p>
+                    <p>Inventing solar panels that work super-duper well in space</p>
                 </div>
                 <div class="option" onclick="selectOption(this, 'feasibility', true)">
-                    <p>Acquiring enough building material</p>
+                    <p>Getting enough building materials (like, where do you even get that much stuff?)</p>
                 </div>
                 <div class="option" onclick="selectOption(this, 'feasibility', false)">
-                    <p>International cooperation</p>
+                    <p>Getting all countries to agree on the project (cosmic politics!)</p>
                 </div>
             </div>
             
             <div class="feedback" id="feasibility-feedback">
-                <p>Materials present the most staggering challenge. Even for a modest Dyson Swarm, we'd need to dismantle entire planets like Mercury - and that would only get us a partial structure. Other challenges include launching millions of collectors, ensuring stability, and transmitting the energy.</p>
+                <p>Materials are the ULTIMATE challenge! Even for a modest Dyson Swarm, we might need to dismantle entire planets. Mercury could be a starter planet, but even that would only get us a partial structure.</p>
+                <p>This is literally a "we need to break down planets to build this" level project. Talk about ambitious!</p>
+            </div>
+            
+            <div class="form-group" id="feasibility-response" style="display: none;">
+                <label for="feasibility-thought">What wild ideas do you have about how we could solve this building challenge?</label>
+                <textarea id="feasibility-thought" placeholder="Maybe we could... / What if we tried... / I think..."></textarea>
+                <p class="input-hint">Get creative! Mary loves imaginative solutions!</p>
+                
+                <div class="checkbox-container">
+                    <input type="checkbox" id="feasibility-fact-check">
+                    <label for="feasibility-fact-check" class="checkbox-label">Is this NOT a fact? (Check if you're sharing an opinion, idea, or question rather than a verified fact)</label>
+                </div>
+                
+                <button class="btn btn-submit" onclick="submitResponse('feasibility')">Add to the Collection</button>
             </div>
             
             <div class="clearfix">
                 <button class="btn btn-prev" onclick="showSection('concept')">← Back</button>
-                <button class="btn btn-next" id="feasibility-next" style="display: none;" onclick="showSection('importance'); addMorePanels();">Continue →</button>
+                <button class="btn btn-next" id="feasibility-next" style="display: none;" onclick="showSection('importance'); addMorePanels();">Onward! →</button>
             </div>
         </div>
         
         <!-- Importance Section -->
         <div class="game-section" id="importance">
-            <h2>The Importance: Why Should We Care?</h2>
+            <h2>Why Should We Even Care?</h2>
             
-            <p>What's the most compelling reason to consider Dyson Spheres?</p>
+            <p>OK so it's basically impossible to build right now, but why is this concept still worth talking about at Mary's Science Fair?</p>
             
             <div class="options">
                 <div class="option" onclick="selectOption(this, 'importance', false)">
-                    <p>Shielding Earth from radiation</p>
+                    <p>It would make an excellent space umbrella to cool down Earth</p>
                 </div>
                 <div class="option" onclick="selectOption(this, 'importance', true)">
-                    <p>Energy needs for advanced civilizations</p>
+                    <p>It represents the ultimate energy source for super advanced civilizations</p>
                 </div>
                 <div class="option" onclick="selectOption(this, 'importance', false)">
-                    <p>Science fiction story ideas</p>
+                    <p>It's mostly just a fun thing for sci-fi writers to play with</p>
                 </div>
                 <div class="option" onclick="selectOption(this, 'importance', false)">
-                    <p>Creating new habitable space</p>
+                    <p>We could use it to send messages to aliens more effectively</p>
                 </div>
             </div>
             
             <div class="feedback" id="importance-feedback">
-                <p>Energy is key. A Dyson structure could capture up to 400 septillion watts from our sun - about 2.3 trillion times humanity's current energy consumption. It represents a transition from a Type I civilization (planetary energy) to Type II (stellar energy) on the Kardashev Scale.</p>
+                <p>It's all about ENERGY! A completed Dyson structure could capture about 400 septillion watts from our sun. That's roughly 2.3 TRILLION times what all humans currently use. Talk about an upgrade from solar panels on your roof!</p>
+                <p>Plus, astronomers think looking for Dyson Spheres might be a way to find advanced alien civilizations. If we see a star that looks dimmer than it should be, maybe aliens built something around it!</p>
+            </div>
+            
+            <div class="form-group" id="importance-response" style="display: none;">
+                <label for="importance-thought">What would YOU do with all that energy if we had a Dyson Sphere?</label>
+                <textarea id="importance-thought" placeholder="I would use it to... / Imagine if we could... / The best use would be..."></textarea>
+                <p class="input-hint">Be as creative or practical as you want!</p>
+                
+                <div class="checkbox-container">
+                    <input type="checkbox" id="importance-fact-check">
+                    <label for="importance-fact-check" class="checkbox-label">Is this NOT a fact? (Check if you're sharing an opinion, idea, or question rather than a verified fact)</label>
+                </div>
+                
+                <button class="btn btn-submit" onclick="submitResponse('importance')">Add to the Collection</button>
             </div>
             
             <div class="clearfix">
                 <button class="btn btn-prev" onclick="showSection('feasibility')">← Back</button>
-                <button class="btn btn-next" id="importance-next" style="display: none;" onclick="showSection('build'); completeDysonSwarm();">Let's Build! →</button>
+                <button class="btn btn-next" id="importance-next" style="display: none;" onclick="showSection('build'); completeDysonSwarm();">Let's Build Something! →</button>
             </div>
         </div>
         
         <!-- Build Section -->
         <div class="game-section" id="build">
-            <h2>Build Your Dyson Swarm!</h2>
+            <h2>Let's Build Our Own Mini Cosmic Structure!</h2>
             
-            <div class="dyson-sphere-container" id="buildContainer">
+            <div class="cosmic-sphere-container" id="buildContainer">
                 <div class="star"></div>
                 <!-- Panels will be added by JavaScript -->
             </div>
             
-            <p>You have 100 resource units. Choose wisely:</p>
+            <p>You have 100 Curiosity Points to use. How would you allocate them?</p>
             
             <div class="options">
-                <button class="btn" onclick="allocateResources('satellites', 20)">Solar Satellites (-20)</button>
-                <button class="btn" onclick="allocateResources('energy', 30)">Energy Collection (-30)</button>
-                <button class="btn" onclick="allocateResources('transmission', 25)">Energy Transmission (-25)</button>
-                <button class="btn" onclick="allocateResources('stability', 35)">Orbital Stability (-35)</button>
+                <button class="btn" onclick="allocateResources('satellites', 20)">Add Solar Collectors (-20 points)</button>
+                <button class="btn" onclick="allocateResources('energy', 30)">Improve Energy Collection (-30 points)</button>
+                <button class="btn" onclick="allocateResources('transmission', 25)">Better Energy Transmission (-25 points)</button>
+                <button class="btn" onclick="allocateResources('stability', 35)">Enhance Orbital Stability (-35 points)</button>
             </div>
             
-            <p class="resource-counter">Resources: <span id="resources-build">100</span> units</p>
+            <p class="resource-counter">Curiosity Points: <span id="resources-build">100</span></p>
             <p>Energy Collected: <span id="energy-collected">0</span>%</p>
+            
+            <div class="form-group" id="build-response" style="display: none;">
+                <label for="build-thought">Share your own cosmic curiosity or a "Good Fact" for Mary's Wall:</label>
+                <textarea id="build-thought" placeholder="A cool fact I know is... / I've always wondered about... / Did you know that..."></textarea>
+                <p class="input-hint">This can be about Dyson Spheres or ANY science/space topic that fascinates you!</p>
+                
+                <div class="checkbox-container">
+                    <input type="checkbox" id="build-fact-check">
+                    <label for="build-fact-check" class="checkbox-label">Is this NOT a fact? (Check if you're sharing an opinion, idea, or question rather than a verified fact)</label>
+                </div>
+                
+                <button class="btn btn-submit" onclick="submitResponse('build')">Add to the Wall of Good Facts</button>
+            </div>
             
             <div class="clearfix">
                 <button class="btn btn-prev" onclick="showSection('importance')">← Back</button>
-                <button class="btn btn-next" id="build-next" style="display: none;" onclick="showSection('conclusion')">See Results →</button>
+                <button class="btn btn-next" id="build-next" style="display: none;" onclick="showSection('conclusion')">See Everyone's Contributions →</button>
             </div>
         </div>
         
         <!-- Conclusion Section -->
         <div class="game-section" id="conclusion">
-            <h2>Congratulations, Cosmic Engineer!</h2>
-            <div class="congratulations">
-                <h3>Final Score: <span id="final-score">0</span>/100</h3>
-                <p>Energy Capture: <span id="final-energy">0</span>%</p>
-                <p>Total Responses: <span id="total-responses">0</span></p>
+            <div class="congrats-container">
+                <h2>Thanks for Contributing to Mary's Science Fair!</h2>
+                <p>Your Fun Points: <span id="final-score">0</span></p>
+                <p>Your Energy Collection: <span id="final-energy">0</span>%</p>
             </div>
             
-            <p>Dyson Spheres remain speculative, but the concept pushes us to think about humanity's potential future - harnessing the full energy of a star system instead of just a planet.</p>
+            <div class="wall-of-facts">
+                <h3>Wall of Good Facts & Cosmic Curiosities</h3>
+                <p style="text-align: center;">See what others have shared at Mary's Science Fair!</p>
+                <ul id="fact-wall">
+                    <!-- Facts will be added here by JavaScript -->
+                </ul>
+            </div>
             
-            <p>Key takeaways:</p>
-            <ul>
-                <li>The scale of available energy in our cosmic neighborhood is staggering</li>
-                <li>We're still in the infancy of our technological journey</li>
-                <li>Such megastructures represent logical endpoints of our energy needs</li>
-            </ul>
+            <div class="form-group">
+                <label for="name-input">Before you go, tell us your name (so Mary knows who contributed):</label>
+                <input type="text" id="name-input" placeholder="Your name">
+                
+                <label for="final-thought">Any birthday wishes or final thoughts for Mary?</label>
+                <textarea id="final-thought" placeholder="Happy Birthday Mary! / I loved learning about... / This made me think about..."></textarea>
+                
+                <div class="checkbox-container">
+                    <input type="checkbox" id="final-fact-check">
+                    <label for="final-fact-check" class="checkbox-label">Is this NOT a fact? (Check if you're sharing an opinion, idea, or question rather than a verified fact)</label>
+                </div>
+                
+                <button class="btn btn-submit" onclick="submitFinalThought()">Submit & Celebrate</button>
+            </div>
             
-            <button class="btn btn-restart" onclick="restartGame()">Play Again</button>
+            <div class="mary-says">
+                "Science fair is an invitation to follow your curiosity. The point is JOY, so only do this if it feels fun!" - Mary
+            </div>
+            
+            <button class="btn btn-restart" onclick="restartGame()">Start Over</button>
         </div>
     </div>
 
@@ -456,12 +689,30 @@
         };
         let resources = 100;
         let energyCollected = 0;
+        let userName = "";
         
-        // Response counters
-        let responseCounts = {
-            'concept': 0,
-            'feasibility': 0,
-            'importance': 0
+        // Store all responses
+        let responses = {
+            'concept': [],
+            'feasibility': [],
+            'importance': [],
+            'build': [],
+            'final': []
+        };
+        
+        // Sample starter facts (could be pre-populated or from a database)
+        const starterFacts = [
+            {text: "Our sun produces enough energy in one second to meet humanity's power needs for almost 500,000 years!", name: "Mary", isFact: true},
+            {text: "I wonder if Dyson Spheres could be used to create artificial habitats with custom climates!", name: "Science Friend", isFact: false},
+            {text: "What if we put Dyson Spheres around multiple stars and connected them with space highways?", name: "Cosmic Explorer", isFact: false},
+            {text: "I think the first step toward a Dyson Sphere would be building a space elevator to make launching materials cheaper!", name: "Space Engineer", isFact: false}
+        ];
+        
+        // Initialize wall of facts with starter facts
+        window.onload = function() {
+            for (const fact of starterFacts) {
+                addFactToWall(fact.text, fact.name, fact.isFact);
+            }
         };
         
         // Game progression
@@ -481,238 +732,3 @@
         // Handle option selection
         function selectOption(element, questionId, isCorrect) {
             // Only allow selection if question hasn't been answered
-            if (questionAnswered[questionId]) return;
-            
-            // Mark question as answered
-            questionAnswered[questionId] = true;
-            
-            // Increment response counter for this section
-            responseCounts[questionId]++;
-            document.getElementById(questionId + '-count').textContent = responseCounts[questionId];
-            
-            // Calculate total responses
-            const totalResponses = Object.values(responseCounts).reduce((a, b) => a + b, 0);
-            document.getElementById('total-responses').textContent = totalResponses;
-            
-            // Remove any previous selections
-            document.querySelectorAll('#' + questionId + ' .option').forEach(opt => {
-                opt.classList.remove('selected', 'correct', 'incorrect');
-            });
-            
-            // Mark the selected option
-            element.classList.add('selected');
-            
-            // Show feedback
-            const feedback = document.getElementById(questionId + '-feedback');
-            
-            if (isCorrect) {
-                score += 20;
-                element.classList.add('correct');
-                feedback.classList.add('correct');
-                feedback.classList.remove('incorrect');
-                document.getElementById('score').textContent = score;
-                document.getElementById('resources').textContent = 100 + score;
-                
-                // Animate score change
-                document.getElementById('score').classList.add('resource-animation');
-                setTimeout(() => {
-                    document.getElementById('score').classList.remove('resource-animation');
-                }, 500);
-            } else {
-                element.classList.add('incorrect');
-                feedback.classList.add('incorrect');
-                feedback.classList.remove('correct');
-                
-                // Find and highlight the correct answer
-                document.querySelectorAll('#' + questionId + ' .option').forEach(opt => {
-                    if (opt.querySelector('p').textContent.includes(getCorrectAnswer(questionId))) {
-                        opt.classList.add('correct');
-                    }
-                });
-            }
-            
-            feedback.style.display = 'block';
-            document.getElementById(questionId + '-next').style.display = 'block';
-        }
-        
-        // Get correct answer text for each question
-        function getCorrectAnswer(questionId) {
-            const answers = {
-                'concept': 'A swarm of orbiting solar collectors',
-                'feasibility': 'Acquiring enough building material',
-                'importance': 'Energy needs for advanced civilizations'
-            };
-            return answers[questionId];
-        }
-        
-        // Handle resource allocation
-        function allocateResources(type, cost) {
-            const resourcesElement = document.getElementById('resources-build');
-            const currentResources = parseInt(resourcesElement.textContent);
-            
-            if (currentResources < cost) {
-                alert("Not enough resources!");
-                return;
-            }
-            
-            // Deduct resources
-            const newResources = currentResources - cost;
-            resourcesElement.textContent = newResources;
-            
-            // Update energy collection based on type
-            switch(type) {
-                case 'satellites':
-                    energyCollected += 15;
-                    addSatellites(5);
-                    break;
-                case 'energy':
-                    energyCollected += 25;
-                    addSatellites(3);
-                    break;
-                case 'transmission':
-                    energyCollected += 20;
-                    addSatellites(2);
-                    break;
-                case 'stability':
-                    energyCollected += 30;
-                    addSatellites(4);
-                    break;
-            }
-            
-            // Cap energy at 100%
-            energyCollected = Math.min(energyCollected, 100);
-            document.getElementById('energy-collected').textContent = energyCollected;
-            
-            // Show next button when resources are depleted or energy reaches 100%
-            if (newResources < 20 || energyCollected >= 100) {
-                document.getElementById('build-next').style.display = 'block';
-                
-                // Update final scores
-                document.getElementById('final-score').textContent = score + energyCollected;
-                document.getElementById('final-energy').textContent = energyCollected;
-            }
-        }
-        
-        // Add visual Dyson components
-        function addDysonRing() {
-            const container = document.querySelector('#concept .dyson-sphere-container');
-            const ring = document.createElement('div');
-            ring.className = 'dyson-ring';
-            ring.style.width = '200px';
-            ring.style.height = '200px';
-            container.appendChild(ring);
-        }
-        
-        function addMorePanels() {
-            const container = document.querySelector('#importance .dyson-sphere-container');
-            
-            // First add a ring
-            const ring = document.createElement('div');
-            ring.className = 'dyson-ring';
-            ring.style.width = '220px';
-            ring.style.height = '220px';
-            container.appendChild(ring);
-            
-            // Add a second ring
-            const ring2 = document.createElement('div');
-            ring2.className = 'dyson-ring';
-            ring2.style.width = '180px';
-            ring2.style.height = '180px';
-            container.appendChild(ring2);
-            
-            // Add some panels
-            for (let i = 0; i < 12; i++) {
-                addPanel(container, 90, i * 30, 12, 8);
-                addPanel(container, 110, i * 30 + 15, 12, 8);
-            }
-        }
-        
-        function addPanel(container, distance, angle, width, height) {
-            const panel = document.createElement('div');
-            panel.className = 'dyson-panel';
-            panel.style.width = width + 'px';
-            panel.style.height = height + 'px';
-            
-            // Calculate position
-            const radians = angle * Math.PI / 180;
-            const centerX = 150;
-            const centerY = 150;
-            const x = centerX + distance * Math.cos(radians) - (width / 2);
-            const y = centerY + distance * Math.sin(radians) - (height / 2);
-            
-            panel.style.left = x + 'px';
-            panel.style.top = y + 'px';
-            panel.style.transform = `rotate(${angle + 90}deg)`;
-            
-            container.appendChild(panel);
-        }
-        
-        function completeDysonSwarm() {
-            // This function will be called when moving to the build section
-            const container = document.getElementById('buildContainer');
-            
-            // Create three rings
-            const ringWidths = [160, 190, 220];
-            for (let width of ringWidths) {
-                const ring = document.createElement('div');
-                ring.className = 'dyson-ring';
-                ring.style.width = width + 'px';
-                ring.style.height = width + 'px';
-                container.appendChild(ring);
-            }
-        }
-        
-        function addSatellites(count) {
-            const container = document.getElementById('buildContainer');
-            const distances = [80, 95, 110];
-            
-            for (let i = 0; i < count; i++) {
-                // Randomly choose a distance
-                const distance = distances[Math.floor(Math.random() * distances.length)];
-                const angle = Math.random() * 360;
-                addPanel(container, distance, angle, 10, 6);
-            }
-        }
-        
-        // Restart the game
-        function restartGame() {
-            score = 0;
-            document.getElementById('score').textContent = score;
-            energyCollected = 0;
-            document.getElementById('energy-collected').textContent = energyCollected;
-            resources = 100;
-            document.getElementById('resources').textContent = resources;
-            document.getElementById('resources-build').textContent = resources;
-            
-            // Reset question status
-            questionAnswered = {
-                'concept': false,
-                'feasibility': false,
-                'importance': false
-            };
-            
-            // Hide all feedback and next buttons
-            document.querySelectorAll('.feedback').forEach(el => {
-                el.style.display = 'none';
-                el.classList.remove('correct', 'incorrect');
-            });
-            document.querySelectorAll('#concept-next, #feasibility-next, #importance-next, #build-next').forEach(el => {
-                el.style.display = 'none';
-            });
-            
-            // Reset all options
-            document.querySelectorAll('.option').forEach(el => {
-                el.classList.remove('selected', 'correct', 'incorrect');
-            });
-            
-            // Remove all Dyson components
-            document.querySelectorAll('.dyson-ring, .dyson-panel').forEach(el => {
-                el.remove();
-            });
-            
-            // Go back to intro
-            showSection('intro');
-        }
-    </script>
-</body>
-</html>
