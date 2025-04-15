@@ -1,919 +1,791 @@
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Dyson Sphere Science Fair Adventure</title>
-
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
-
     <!-- Font Awesome for icons -->
-
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-
-    <!-- Firebase SDK -->
-
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-
     <style>
-
         @keyframes gradientBG {
-
             0% {background-position: 0% 50%}
-
             50% {background-position: 100% 50%}
-
             100% {background-position: 0% 50%}
-
         }
-
         .space-bg {
-
             background: linear-gradient(45deg, #0f2027, #203a43, #2c5364);
-
             background-size: 400% 400%;
-
             animation: gradientBG 15s ease infinite;
-
         }
-
         .star {
-
             position: absolute;
-
             width: 2px;
-
             height: 2px;
-
             background: white;
-
             border-radius: 50%;
-
         }
-
         .option-hover:hover {
-
             transform: translateY(-2px);
-
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-
         }
-
         .pulse {
-
             animation: pulse 2s infinite;
-
         }
-
         @keyframes pulse {
-
             0% {
-
                 transform: scale(1);
-
             }
-
             50% {
-
                 transform: scale(1.05);
-
             }
-
             100% {
-
                 transform: scale(1);
-
             }
-
         }
-
         .custom-scrollbar::-webkit-scrollbar {
-
             width: 8px;
-
         }
-
         .custom-scrollbar::-webkit-scrollbar-track {
-
             background: #f1f5f9;
-
             border-radius: 10px;
-
         }
-
         .custom-scrollbar::-webkit-scrollbar-thumb {
-
             background: #94a3b8;
-
             border-radius: 10px;
-
         }
-
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-
             background: #64748b;
-
         }
-
     </style>
-
 </head>
-
 <body class="space-bg min-h-screen py-8 relative">
-
     <!-- Create stars in the background -->
-
     <div id="stars-container"></div>
-
     
-
     <div id="app" class="max-w-3xl mx-auto p-6 bg-gray-900 bg-opacity-90 rounded-xl shadow-2xl border border-indigo-900 text-gray-200 relative">
-
         <!-- Game Logo -->
-
         <div class="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-indigo-900 rounded-full p-3 shadow-lg">
-
             <div class="text-2xl text-yellow-400"><i class="fas fa-rocket"></i></div>
-
         </div>
-
         
-
         <!-- Loading Screen -->
-
         <div id="loading-screen" class="text-center py-10">
-
             <h1 class="text-4xl font-bold mb-6 text-indigo-400">Preparing for Launch...</h1>
-
             <div class="relative w-full h-6 bg-gray-800 rounded-full overflow-hidden">
-
                 <div id="loading-bar" class="h-full bg-gradient-to-r from-purple-500 via-indigo-500 to-blue-500 w-0 transition-all duration-300 rounded-full"></div>
-
             </div>
-
             <p class="mt-4 text-indigo-300"><span id="loading-text">Establishing connection...</span></p>
-
         </div>
-
-
 
         <!-- Intro Screen -->
-
         <div id="intro-screen" class="text-center hidden">
-
             <h1 class="text-4xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-500 to-purple-600">COSMIC SCIENCE FAIR</h1>
-
             <div class="mb-6 p-4 bg-indigo-900 bg-opacity-50 rounded-lg border border-indigo-700">
-
                 <p class="text-lg italic mb-4 text-gray-200">"Science fair is an invitation to follow your curiosity. The point is JOY, so only do this if it feels fun."</p>
-
                 <p class="font-semibold text-purple-300">- Mary</p>
-
             </div>
-
             
-
             <div class="relative">
-
                 <h2 class="text-3xl font-bold mb-4 text-yellow-400 pulse">TODAY'S CHALLENGE: DYSON SPHERES</h2>
-
                 <img src="/api/placeholder/500/250" alt="Dyson Sphere Concept" class="w-full h-48 object-cover rounded-lg mb-6 opacity-80" />
-
                 <p class="mb-8 text-lg text-gray-300">Join us for an adventure into mega space structures, stellar energy harvesting, and the future of human civilization beyond Earth!</p>
-
             </div>
-
             
-
             <div class="mb-6 bg-gray-800 p-6 rounded-lg border border-indigo-800">
-
                 <label for="player-name" class="block text-indigo-300 mb-2 font-bold">Enter your cosmic explorer name:</label>
-
                 <input
-
                     type="text"
-
                     id="player-name"
-
                     class="w-full p-3 bg-gray-700 border-2 border-indigo-600 rounded-lg focus:outline-none focus:border-indigo-400 text-gray-200"
-
                     placeholder="Cosmic Explorer"
-
                 />
-
                 <p class="text-sm text-gray-400 mt-2">What shall we call you on this interstellar adventure?</p>
-
             </div>
-
             
-
             <button
-
                 id="start-button"
-
                 class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-4 px-8 rounded-lg text-xl transform transition duration-200 hover:scale-105 flex items-center justify-center mx-auto"
-
             >
-
                 <i class="fas fa-rocket mr-2"></i> Begin Your Cosmic Journey!
-
             </button>
-
         </div>
-
-
 
         <!-- Game Screen -->
-
         <div id="game-screen" class="hidden">
-
             <h1 class="text-3xl font-bold mb-4 text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-500 to-purple-600">THE GREAT DYSON SPHERE CHALLENGE</h1>
-
             <p id="player-greeting" class="mb-6 text-center text-lg text-gray-300">Greetings, explorer! Ready to test your cosmic engineering knowledge?</p>
-
             
-
             <div class="space-y-8 mb-8">
-
                 <div class="p-5 bg-gray-800 rounded-lg border border-indigo-800 transition-all duration-300 hover:border-indigo-500">
-
                     <h3 class="text-xl font-bold mb-3 text-indigo-400 flex items-center">
-
                         <span class="bg-indigo-900 text-indigo-300 rounded-full w-8 h-8 flex items-center justify-center mr-2">1</span>
-
                         What is a Dyson Sphere?
-
                     </h3>
-
                     <div class="space-y-3 ml-10">
-
                         <label class="flex items-start p-3 bg-gray-700 rounded-lg transition-all duration-300 option-hover cursor-pointer">
-
                             <input
-
                                 type="radio"
-
                                 name="q1"
-
                                 value="a"
-
                                 class="mt-1 mr-3 q1-option"
-
                             />
-
                             <div>
-
                                 <span class="text-gray-300">A vacuum cleaner technology developed by James Dyson to clean spherical objects</span>
-
                                 <div class="hidden mt-2 text-sm text-gray-400 q1-a-feedback">Not quite! While James Dyson is known for vacuum technology, Dyson Spheres are named after physicist Freeman Dyson.</div>
-
                             </div>
-
                         </label>
-
                         <label class="flex items-start p-3 bg-gray-700 rounded-lg transition-all duration-300 option-hover cursor-pointer">
-
                             <input
-
                                 type="radio"
-
                                 name="q1"
-
                                 value="b"
-
                                 class="mt-1 mr-3 q1-option"
-
                             />
-
                             <div>
-
                                 <span class="text-gray-300">A hypothetical megastructure that completely encompasses a star to capture its energy output</span>
-
                                 <div class="hidden mt-2 text-sm text-indigo-300 q1-b-feedback">Correct! A Dyson Sphere is a theoretical megastructure that surrounds a star to harvest its energy.</div>
-
                             </div>
-
                         </label>
-
                         <label class="flex items-start p-3 bg-gray-700 rounded-lg transition-all duration-300 option-hover cursor-pointer">
-
                             <input
-
                                 type="radio"
-
                                 name="q1"
-
                                 value="c"
-
                                 class="mt-1 mr-3 q1-option"
-
                             />
-
                             <div>
-
                                 <span class="text-gray-300">A spherical spaceship designed to travel between dimensions</span>
-
                                 <div class="hidden mt-2 text-sm text-gray-400 q1-c-feedback">That sounds like science fiction! Dyson Spheres are about energy collection, not dimensional travel.</div>
-
                             </div>
-
                         </label>
-
                     </div>
-
                 </div>
-
                 
-
                 <div class="p-5 bg-gray-800 rounded-lg border border-indigo-800 transition-all duration-300 hover:border-indigo-500">
-
                     <h3 class="text-xl font-bold mb-3 text-indigo-400 flex items-center">
-
                         <span class="bg-indigo-900 text-indigo-300 rounded-full w-8 h-8 flex items-center justify-center mr-2">2</span>
-
                         How likely are humans to be able to create and use a Dyson Sphere?
-
                     </h3>
-
                     <div class="space-y-3 ml-10">
-
                         <label class="flex items-start p-3 bg-gray-700 rounded-lg transition-all duration-300 option-hover cursor-pointer">
-
                             <input
-
                                 type="radio"
-
                                 name="q2"
-
                                 value="a"
-
                                 class="mt-1 mr-3 q2-option"
-
                             />
-
                             <div>
-
                                 <span class="text-gray-300">We could probably build one next Tuesday if we really wanted to</span>
-
                                 <div class="hidden mt-2 text-sm text-gray-400 q2-a-feedback">If only it were that simple! We're still figuring out how to efficiently build space stations.</div>
-
                             </div>
-
                         </label>
-
                         <label class="flex items-start p-3 bg-gray-700 rounded-lg transition-all duration-300 option-hover cursor-pointer">
-
                             <input
-
                                 type="radio"
-
                                 name="q2"
-
                                 value="b"
-
                                 class="mt-1 mr-3 q2-option"
-
                             />
-
                             <div>
-
                                 <span class="text-gray-300">Completely impossible due to laws of physics - we'd break the universe trying</span>
-
                                 <div class="hidden mt-2 text-sm text-gray-400 q2-b-feedback">The laws of physics don't actually prohibit Dyson Spheres - they're challenging but theoretically possible!</div>
-
                             </div>
-
                         </label>
-
                         <label class="flex items-start p-3 bg-gray-700 rounded-lg transition-all duration-300 option-hover cursor-pointer">
-
                             <input
-
                                 type="radio"
-
                                 name="q2"
-
                                 value="c"
-
                                 class="mt-1 mr-3 q2-option"
-
                             />
-
                             <div>
-
                                 <span class="text-gray-300">Theoretically possible but far beyond our current technology - think centuries rather than decades</span>
-
                                 <div class="hidden mt-2 text-sm text-indigo-300 q2-c-feedback">Correct! We have the theoretical knowledge but lack the necessary materials science, energy systems, and space manufacturing capabilities.</div>
-
                             </div>
-
                         </label>
-
                     </div>
-
                 </div>
-
                 
-
                 <div class="p-5 bg-gray-800 rounded-lg border border-indigo-800 transition-all duration-300 hover:border-indigo-500">
-
                     <h3 class="text-xl font-bold mb-3 text-indigo-400 flex items-center">
-
                         <span class="bg-indigo-900 text-indigo-300 rounded-full w-8 h-8 flex items-center justify-center mr-2">3</span>
-
                         If we made a Dyson Sphere, why would it be a big deal?
-
                     </h3>
-
                     <div class="space-y-3 ml-10">
-
                         <label class="flex items-start p-3 bg-gray-700 rounded-lg transition-all duration-300 option-hover cursor-pointer">
-
                             <input
-
                                 type="radio"
-
                                 name="q3"
-
                                 value="a"
-
                                 class="mt-1 mr-3 q3-option"
-
                             />
-
                             <div>
-
                                 <span class="text-gray-300">It would provide nearly unlimited energy for civilization advancement, space exploration, and solving energy crises</span>
-
                                 <div class="hidden mt-2 text-sm text-indigo-300 q3-a-feedback">Correct! A Dyson Sphere could theoretically capture most of the 384.6 yottawatts of energy our Sun produces.</div>
-
                             </div>
-
                         </label>
-
                         <label class="flex items-start p-3 bg-gray-700 rounded-lg transition-all duration-300 option-hover cursor-pointer">
-
                             <input
-
                                 type="radio"
-
                                 name="q3"
-
                                 value="b"
-
                                 class="mt-1 mr-3 q3-option"
-
                             />
-
                             <div>
-
                                 <span class="text-gray-300">It would look really cool in Instagram photos</span>
-
                                 <div class="hidden mt-2 text-sm text-gray-400 q3-b-feedback">While it would certainly be photogenic, the significance goes far beyond social media potential!</div>
-
                             </div>
-
                         </label>
-
                         <label class="flex items-start p-3 bg-gray-700 rounded-lg transition-all duration-300 option-hover cursor-pointer">
-
                             <input
-
                                 type="radio"
-
                                 name="q3"
-
                                 value="c"
-
                                 class="mt-1 mr-3 q3-option"
-
                             />
-
                             <div>
-
                                 <span class="text-gray-300">We'd be able to control the weather on Earth and make it sunny all the time</span>
-
                                 <div class="hidden mt-2 text-sm text-gray-400 q3-c-feedback">Actually, a Dyson Sphere would reduce sunlight reaching Earth! It's about capturing the Sun's energy, not controlling Earth's weather.</div>
-
                             </div>
-
                         </label>
-
                     </div>
-
                 </div>
-
                 
-
                 <div class="p-5 bg-gray-800 rounded-lg border border-indigo-800 transition-all duration-300 hover:border-indigo-500">
-
                     <h3 class="text-xl font-bold mb-3 text-indigo-400 flex items-center">
-
                         <span class="bg-indigo-900 text-indigo-300 rounded-full w-8 h-8 flex items-center justify-center mr-2">4</span>
-
                         What might a more practical first step toward a Dyson Sphere look like?
-
                     </h3>
-
                     <div class="space-y-3 ml-10">
-
                         <label class="flex items-start p-3 bg-gray-700 rounded-lg transition-all duration-300 option-hover cursor-pointer">
-
                             <input
-
                                 type="radio"
-
                                 name="q4"
-
                                 value="a"
-
                                 class="mt-1 mr-3 q4-option"
-
                             />
-
                             <div>
-
                                 <span class="text-gray-300">Building a solid shell around the Sun all at once</span>
-
                                 <div class="hidden mt-2 text-sm text-gray-400 q4-a-feedback">A complete solid shell would be nearly impossible to construct and maintain structurally.</div>
-
                             </div>
-
                         </label>
-
                         <label class="flex items-start p-3 bg-gray-700 rounded-lg transition-all duration-300 option-hover cursor-pointer">
-
                             <input
-
                                 type="radio"
-
                                 name="q4"
-
                                 value="b"
-
                                 class="mt-1 mr-3 q4-option"
-
                             />
-
                             <div>
-
                                 <span class="text-gray-300">A Dyson Swarm of many independent solar collectors orbiting the Sun</span>
-
                                 <div class="hidden mt-2 text-sm text-indigo-300 q4-b-feedback">Correct! A Dyson Swarm of individual satellites or structures would be much more practical than a continuous shell.</div>
-
                             </div>
-
                         </label>
-
                         <label class="flex items-start p-3 bg-gray-700 rounded-lg transition-all duration-300 option-hover cursor-pointer">
-
                             <input
-
                                 type="radio"
-
                                 name="q4"
-
                                 value="c"
-
                                 class="mt-1 mr-3 q4-option"
-
                             />
-
                             <div>
-
                                 <span class="text-gray-300">Simply building bigger traditional power plants on Earth</span>
-
                                 <div class="hidden mt-2 text-sm text-gray-400 q4-c-feedback">Traditional power plants can't capture anywhere near the energy that even a partial Dyson structure could harness.</div>
-
                             </div>
-
                         </label>
-
                     </div>
-
                 </div>
-
             </div>
-
             
-
             <div class="flex justify-between items-center">
-
                 <button
-
                     id="hint-button"
-
                     class="bg-gray-700 hover:bg-gray-600 text-indigo-300 font-bold py-3 px-6 rounded-lg text-lg transform transition duration-200 hover:scale-105 flex items-center"
-
                 >
-
                     <i class="fas fa-lightbulb mr-2"></i> Need a Hint?
-
                 </button>
-
                 
-
                 <button
-
                     id="submit-button"
-
                     class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-3 px-6 rounded-lg text-lg transform transition duration-200 hover:scale-105 flex items-center"
-
                 >
-
                     Submit Your Answers! <i class="fas fa-paper-plane ml-2"></i>
-
                 </button>
-
             </div>
-
         </div>
 
-
-
         <!-- Results Screen -->
-
         <div id="results-screen" class="hidden">
-
             <div id="score-animation" class="py-8 text-center hidden">
-
                 <div class="inline-block p-4 bg-indigo-900 bg-opacity-70 rounded-full">
-
                     <div class="text-6xl text-yellow-400"><i class="fas fa-star"></i></div>
-
                 </div>
-
                 <h1 class="text-4xl font-bold mt-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-500 to-purple-600">CALCULATING RESULTS...</h1>
-
             </div>
-
             
-
             <div id="results-content" class="hidden">
-
                 <h1 class="text-3xl font-bold mb-4 text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-500 to-purple-600">YOUR COSMIC RESULTS</h1>
-
                 
-
                 <div class="mb-6 p-6 bg-gray-800 rounded-lg border border-indigo-800 text-center">
-
                     <div id="score-badge" class="inline-block mb-4 p-3 bg-indigo-900 rounded-full">
-
                         <div class="text-3xl text-yellow-400"><i class="fas fa-award"></i></div>
-
                     </div>
-
                     <p id="player-score" class="text-3xl font-bold mb-2 text-gray-200">
-
                         You scored: 0/4
-
                     </p>
-
                     <p id="score-message" class="text-lg text-gray-300">
-
                         Keep exploring! The universe is full of wonders to discover!
-
                     </p>
-
                 </div>
-
                 
-
                 <div class="mb-8 p-4 bg-indigo-900 bg-opacity-40 rounded-lg border border-indigo-800">
-
                     <h2 class="text-xl font-bold mb-3 text-purple-300 flex items-center">
-
                         <i class="fas fa-flask mr-2"></i> THE SCIENCE BEHIND YOUR ANSWERS:
-
                     </h2>
-
                     <ul id="feedback-list" class="space-y-4">
-
                         <!-- Feedback will be inserted here -->
-
                     </ul>
-
                 </div>
-
     
-
                 <div class="mb-6 p-4 bg-gray-800 rounded-lg border border-indigo-800">
-
                     <div class="flex justify-between items-center mb-3">
-
                         <h2 class="text-xl font-bold text-indigo-400"><i class="fas fa-chart-bar mr-2"></i> COSMIC EXPLORER STATS</h2>
-
                         <button id="reset-stats-button" class="bg-red-900 hover:bg-red-800 text-white text-sm font-bold py-1 px-3 rounded">
-
                             <i class="fas fa-trash-alt mr-1"></i> Reset
-
                         </button>
-
                     </div>
-
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-
                         <div class="p-3 bg-gray-700 rounded-lg text-center border border-gray-600">
-
                             <h3 class="font-bold text-indigo-300 mb-2">Most Popular Answers</h3>
-
                             <div id="popular-answers" class="space-y-2 text-sm text-gray-300">
-
                                 <div class="flex justify-between">
-
                                     <span>Q1: Option B</span>
-
                                     <span class="q1-b-count">0</span>
-
                                 </div>
-
                                 <div class="flex justify-between">
-
                                     <span>Q2: Option C</span>
-
                                     <span class="q2-c-count">0</span>
-
                                 </div>
-
                                 <div class="flex justify-between">
-
                                     <span>Q3: Option A</span>
-
                                     <span class="q3-a-count">0</span>
-
                                 </div>
-
                                 <div class="flex justify-between">
-
                                     <span>Q4: Option B</span>
-
                                     <span class="q4-b-count">0</span>
-
                                 </div>
-
                             </div>
-
                         </div>
-
                         <div class="p-3 bg-gray-700 rounded-lg text-center border border-gray-600">
-
                             <h3 class="font-bold text-indigo-300 mb-2">Explorer Achievement</h3>
-
                             <div id="explorer-achievement" class="text-center">
-
                                 <p class="text-gray-300 mb-2">You rank among the top:</p>
-
                                 <p id="percentile" class="text-3xl font-bold text-yellow-400">0%</p>
-
                                 <p class="text-gray-400 text-sm">of cosmic explorers</p>
-
                             </div>
-
                         </div>
-
                     </div>
-
                     <div class="mt-4 text-center">
-
                         <p id="total-players" class="font-bold text-indigo-300">Total explorers: 0</p>
-
                     </div>
-
                 </div>
-
                 
-
                 <div class="mb-8 p-4 bg-gray-800 rounded-lg border border-indigo-800">
-
                     <div class="flex justify-between items-center mb-3">
-
                         <h2 class="text-xl font-bold text-indigo-400"><i class="fas fa-rocket mr-2"></i> COSMIC KNOWLEDGE WALL</h2>
-
                         <button id="reset-facts-button" class="bg-red-900 hover:bg-red-800 text-white text-sm font-bold py-1 px-3 rounded">
-
                             <i class="fas fa-trash-alt mr-1"></i> Clear
-
                         </button>
-
                     </div>
-
                     <p class="mb-4 text-gray-300">Add your own cosmic fact or insight about space, stars, energy, or anything science-related!</p>
-
                     
-
                     <div class="flex flex-col mb-4">
-
                         <input
-
                             type="text"
-
                             id="new-fact"
-
                             class="w-full p-3 mb-2 bg-gray-700 border-2 border-indigo-600 rounded-lg focus:outline-none focus:border-indigo-400 text-gray-200"
-
                             placeholder="Share a fun science fact..."
-
                         />
-
                         <div class="flex space-x-2">
-
                             <input
-
                                 type="text"
-
                                 id="fact-author"
-
                                 class="flex-1 p-3 bg-gray-700 border-2 border-indigo-600 rounded-lg focus:outline-none focus:border-indigo-400 text-gray-200"
-
                                 placeholder="Your name"
-
                             />
-
                             <button
-
                                 id="add-fact-button"
-
                                 class="bg-purple-700 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-lg flex items-center"
-
                             >
-
                                 <i class="fas fa-plus mr-2"></i> Add Knowledge
-
                             </button>
-
                         </div>
-
                     </div>
-
                     
-
                     <div id="fact-wall" class="space-y-2 max-h-60 overflow-y-auto p-3 bg-gray-700 rounded-lg border border-gray-600 custom-scrollbar">
-
                         <p class="text-center italic text-gray-400">Loading cosmic knowledge...</p>
-
                     </div>
-
                     <p id="fact-count" class="mt-2 text-sm text-right font-bold text-indigo-300">Total facts: 0</p>
-
                 </div>
-
                 
-
                 <div class="mb-6 p-4 bg-gray-800 rounded-lg border border-indigo-800">
-
                     <h2 class="text-xl font-bold mb-3 text-center text-indigo-400"><i class="fas fa-lightbulb mr-2"></i> DYSON SPHERE INSIGHTS</h2>
-
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
                         <div class="p-3 bg-gray-700 rounded-lg border border-gray-600">
-
                             <h3 class="text-lg font-bold mb-2 text-purple-300">History & Origin</h3>
-
                             <ul class="space-y-2 text-gray-300 text-sm">
-
                                 <li class="flex items-start"><span class="text-yellow-400 mr-2">•</span> First proposed by physicist Freeman Dyson in 1960</li>
-
                                 <li class="flex items-start"><span class="text-yellow-400 mr-2">•</span> Inspired by science fiction writer Olaf Stapledon's 1937 novel "Star Maker"</li>
-
                                 <li class="flex items-start"><span class="text-yellow-400 mr-2">•</span> Dyson himself never proposed a solid shell, but rather a "swarm" of orbiting structures</li>
-
                             </ul>
-
                         </div>
-
                         <div class="p-3 bg-gray-700 rounded-lg border border-gray-600">
-
                             <h3 class="text-lg font-bold mb-2 text-purple-300">Energy Potential</h3>
-
                             <ul class="space-y-2 text-gray-300 text-sm">
-
                                 <li class="flex items-start"><span class="text-yellow-400 mr-2">•</span> Could capture ~384.6 yottawatts (3.846 × 10²⁶ watts) from our Sun</li>
-
                                 <li class="flex items-start"><span class="text-yellow-400 mr-2">•</span> Earth currently uses ~20,000 terawatts - a Dyson Sphere would provide millions of times more energy</li>
-
                                 <li class="flex items-start"><span class="text-yellow-400 mr-2">•</span> Would enable massive computing power, space exploration, and almost limitless manufacturing</li>
-
                             </ul>
-
                         </div>
-
                         <div class="p-3 bg-gray-700 rounded-lg border border-gray-600">
-
                             <h3 class="text-lg font-bold mb-2 text-purple-300">Construction Challenges</h3>
-
                             <ul class="space-y-2 text-gray-300 text-sm">
-
                                 <li class="flex items-start"><span class="text-yellow-400 mr-2">•</span> Would require dismantling planets for raw materials</li>
-
                                 <li class="flex items-start"><span class="text-yellow-400 mr-2">•</span> Self-replicating robots could potentially build it over centuries</li>
-
                                 <li class="flex items-start"><span class="text-yellow-400 mr-2">•</span> Current materials can't withstand the gravitational and thermal stresses</li>
-
                             </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <button
+                    id="play-again-button"
+                    class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-3 px-6 rounded-lg text-lg transform transition duration-200 hover:scale-105 flex items-center justify-center mx-auto"
+                >
+                    <i class="fas fa-sync-alt mr-2"></i> Play Again!
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Create stars in the background
+        document.addEventListener('DOMContentLoaded', function() {
+            const starsContainer = document.getElementById('stars-container');
+            const starsCount = 100;
+            
+            for (let i = 0; i < starsCount; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.width = `${Math.random() * 3 + 1}px`;
+                star.style.height = star.style.width;
+                star.style.opacity = Math.random();
+                starsContainer.appendChild(star);
+            }
+
+            // Loading sequence
+            const loadingBar = document.getElementById('loading-bar');
+            const loadingText = document.getElementById('loading-text');
+            const loadingScreen = document.getElementById('loading-screen');
+            const introScreen = document.getElementById('intro-screen');
+
+            // Simulate loading
+            let progress = 0;
+            const loadingInterval = setInterval(() => {
+                progress += 5;
+                loadingBar.style.width = `${progress}%`;
+                
+                if (progress === 30) {
+                    loadingText.textContent = 'Calculating stellar energy outputs...';
+                } else if (progress === 60) {
+                    loadingText.textContent = 'Designing megastructures...';
+                } else if (progress === 90) {
+                    loadingText.textContent = 'Preparing cosmic journey...';
+                } else if (progress >= 100) {
+                    clearInterval(loadingInterval);
+                    setTimeout(() => {
+                        loadingScreen.classList.add('hidden');
+                        introScreen.classList.remove('hidden');
+                    }, 500);
+                }
+            }, 100);
+
+            // Game flow
+            const playerNameInput = document.getElementById('player-name');
+            const startButton = document.getElementById('start-button');
+            const gameScreen = document.getElementById('game-screen');
+            const playerGreeting = document.getElementById('player-greeting');
+            const hintButton = document.getElementById('hint-button');
+            const submitButton = document.getElementById('submit-button');
+            const resultsScreen = document.getElementById('results-screen');
+            const scoreAnimation = document.getElementById('score-animation');
+            const resultsContent = document.getElementById('results-content');
+            const playerScore = document.getElementById('player-score');
+            const scoreMessage = document.getElementById('score-message');
+            const feedbackList = document.getElementById('feedback-list');
+            const playAgainButton = document.getElementById('play-again-button');
+            
+            // Start game button
+            startButton.addEventListener('click', () => {
+                let playerName = playerNameInput.value.trim();
+                if (playerName === '') {
+                    playerName = 'Cosmic Explorer';
+                }
+                
+                playerGreeting.textContent = `Greetings, ${playerName}! Ready to test your cosmic engineering knowledge?`;
+                introScreen.classList.add('hidden');
+                gameScreen.classList.remove('hidden');
+                
+                // Scroll to top
+                window.scrollTo(0, 0);
+            });
+            
+            // Hint button
+            hintButton.addEventListener('click', () => {
+                alert('Hint: Dyson Spheres are designed to capture energy, not for transportation or weather control. Think big!');
+            });
+            
+            // Radio button feedback
+            const q1Options = document.querySelectorAll('.q1-option');
+            const q2Options = document.querySelectorAll('.q2-option');
+            const q3Options = document.querySelectorAll('.q3-option');
+            const q4Options = document.querySelectorAll('.q4-option');
+            
+            // Submit answers
+            submitButton.addEventListener('click', () => {
+                let score = 0;
+                let feedbackHTML = '';
+                
+                // Check answers
+                const q1Selected = document.querySelector('input[name="q1"]:checked');
+                const q2Selected = document.querySelector('input[name="q2"]:checked');
+                const q3Selected = document.querySelector('input[name="q3"]:checked');
+                const q4Selected = document.querySelector('input[name="q4"]:checked');
+                
+                if (!q1Selected || !q2Selected || !q3Selected || !q4Selected) {
+                    alert('Please answer all questions before submitting!');
+                    return;
+                }
+                
+                // Question 1
+                if (q1Selected.value === 'b') {
+                    score++;
+                    feedbackHTML += `
+                        <li class="bg-indigo-900 bg-opacity-30 p-3 rounded-lg">
+                            <p class="font-bold text-indigo-300">Question 1: <span class="text-green-400">Correct!</span></p>
+                            <p class="text-gray-300 mt-1">A Dyson Sphere is indeed a megastructure designed to capture a star's energy output.</p>
+                        </li>
+                    `;
+                } else {
+                    feedbackHTML += `
+                        <li class="bg-gray-800 p-3 rounded-lg">
+                            <p class="font-bold text-indigo-300">Question 1: <span class="text-red-400">Incorrect</span></p>
+                            <p class="text-gray-300 mt-1">A Dyson Sphere is a hypothetical megastructure that completely encompasses a star to capture its energy output.</p>
+                        </li>
+                    `;
+                }
+                
+                // Question 2
+                if (q2Selected.value === 'c') {
+                    score++;
+                    feedbackHTML += `
+                        <li class="bg-indigo-900 bg-opacity-30 p-3 rounded-lg">
+                            <p class="font-bold text-indigo-300">Question 2: <span class="text-green-400">Correct!</span></p>
+                            <p class="text-gray-300 mt-1">Building a Dyson Sphere is theoretically possible but would require massive technological advancements.</p>
+                        </li>
+                    `;
+                } else {
+                    feedbackHTML += `
+                        <li class="bg-gray-800 p-3 rounded-lg">
+                            <p class="font-bold text-indigo-300">Question 2: <span class="text-red-400">Incorrect</span></p>
+                            <p class="text-gray-300 mt-1">Building a Dyson Sphere is theoretically possible but requires technology far beyond our current capabilities.</p>
+                        </li>
+                    `;
+                }
+                
+                // Question 3
+                if (q3Selected.value === 'a') {
+                    score++;
+                    feedbackHTML += `
+                        <li class="bg-indigo-900 bg-opacity-30 p-3 rounded-lg">
+                            <p class="font-bold text-indigo-300">Question 3: <span class="text-green-400">Correct!</span></p>
+                            <p class="text-gray-300 mt-1">A Dyson Sphere would provide an almost unlimited energy source, revolutionizing human capabilities.</p>
+                        </li>
+                    `;
+                } else {
+                    feedbackHTML += `
+                        <li class="bg-gray-800 p-3 rounded-lg">
+                            <p class="font-bold text-indigo-300">Question 3: <span class="text-red-400">Incorrect</span></p>
+                            <p class="text-gray-300 mt-1">A Dyson Sphere's significance is in providing nearly unlimited energy for civilization advancement.</p>
+                        </li>
+                    `;
+                }
+                
+                // Question 4
+                if (q4Selected.value === 'b') {
+                    score++;
+                    feedbackHTML += `
+                        <li class="bg-indigo-900 bg-opacity-30 p-3 rounded-lg">
+                            <p class="font-bold text-indigo-300">Question 4: <span class="text-green-400">Correct!</span></p>
+                            <p class="text-gray-300 mt-1">A Dyson Swarm of individual collectors is a more practical first step than a complete shell.</p>
+                        </li>
+                    `;
+                } else {
+                    feedbackHTML += `
+                        <li class="bg-gray-800 p-3 rounded-lg">
+                            <p class="font-bold text-indigo-300">Question 4: <span class="text-red-400">Incorrect</span></p>
+                            <p class="text-gray-300 mt-1">A Dyson Swarm of many independent solar collectors is a more practical approach to start with.</p>
+                        </li>
+                    `;
+                }
+                
+                // Update DOM with results
+                playerScore.textContent = `You scored: ${score}/4`;
+                feedbackList.innerHTML = feedbackHTML;
+                
+                // Set score message
+                if (score === 4) {
+                    scoreMessage.textContent = 'Perfect score! You're a cosmic engineering genius!';
+                } else if (score === 3) {
+                    scoreMessage.textContent = 'Impressive knowledge! You'd make a fine stellar engineer.';
+                } else if (score === 2) {
+                    scoreMessage.textContent = 'Good effort! Your cosmic adventure is just beginning.';
+                } else if (score === 1) {
+                    scoreMessage.textContent = 'Nice try! There's a universe of knowledge still to explore.';
+                } else {
+                    scoreMessage.textContent = 'Keep exploring! The universe is full of wonders to discover!';
+                }
+                
+                // Update answer stats
+                document.querySelector('.q1-b-count').textContent = parseInt(document.querySelector('.q1-b-count').textContent) + (q1Selected.value === 'b' ? 1 : 0);
+                document.querySelector('.q2-c-count').textContent = parseInt(document.querySelector('.q2-c-count').textContent) + (q2Selected.value === 'c' ? 1 : 0);
+                document.querySelector('.q3-a-count').textContent = parseInt(document.querySelector('.q3-a-count').textContent) + (q3Selected.value === 'a' ? 1 : 0);
+                document.querySelector('.q4-b-count').textContent = parseInt(document.querySelector('.q4-b-count').textContent) + (q4Selected.value === 'b' ? 1 : 0);
+                
+                // Calculate percentile (just a simulation since we don't have a database)
+                const randomPercentile = Math.floor(Math.random() * 40) + 60; // Random between 60-99%
+                document.getElementById('percentile').textContent = `${randomPercentile}%`;
+                
+                // Total players count simulation
+                const currentCount = parseInt(document.getElementById('total-players').textContent.split(': ')[1]);
+                document.getElementById('total-players').textContent = `Total explorers: ${currentCount + 1}`;
+                
+                // Show results with animation
+                gameScreen.classList.add('hidden');
+                resultsScreen.classList.remove('hidden');
+                scoreAnimation.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    scoreAnimation.classList.add('hidden');
+                    resultsContent.classList.remove('hidden');
+                    
+                    // Scroll to top
+                    window.scrollTo(0, 0);
+                }, 2000);
+            });
+            
+            // Play again button
+            playAgainButton.addEventListener('click', () => {
+                // Reset forms
+                document.querySelectorAll('input[type="radio"]').forEach(radio => {
+                    radio.checked = false;
+                });
+                
+                // Reset screens
+                resultsScreen.classList.add('hidden');
+                resultsContent.classList.add('hidden');
+                introScreen.classList.remove('hidden');
+                
+                // Scroll to top
+                window.scrollTo(0, 0);
+            });
+            
+            // Knowledge Wall Functionality
+            const factWall = document.getElementById('fact-wall');
+            const newFactInput = document.getElementById('new-fact');
+            const factAuthorInput = document.getElementById('fact-author');
+            const addFactButton = document.getElementById('add-fact-button');
+            const factCount = document.getElementById('fact-count');
+            const resetFactsButton = document.getElementById('reset-facts-button');
+            
+            // Sample facts
+            const sampleFacts = [
+                { text: "The Sun converts about 600 million tons of hydrogen into helium every second!", author: "AstroFan" },
+                { text: "A Dyson Sphere around our Sun would have a radius of approximately 93 million miles.", author: "SpaceEngineer42" },
+                { text: "The concept of Dyson Spheres appear in many sci-fi works including Star Trek and The Expanse.", author: "SciFiLover" }
+            ];
+            
+            // Load sample facts
+            let facts = sampleFacts;
+            updateFactWall();
+            
+            // Add new fact
+            addFactButton.addEventListener('click', () => {
+                const factText = newFactInput.value.trim();
+                let factAuthor = factAuthorInput.value.trim();
+                
+                if (factText === '') {
+                    alert('Please enter a fact to share!');
+                    return;
+                }
+                
+                if (factAuthor === '') {
+                    factAuthor = 'Anonymous Explorer';
+                }
+                
+                facts.push({ text: factText, author: factAuthor });
+                updateFactWall();
+                
+                // Clear inputs
+                newFactInput.value = '';
+                factAuthorInput.value = '';
+            });
+            
+            // Update fact wall
+            function updateFactWall() {
+                if (facts.length === 0) {
+                    factWall.innerHTML = '<p class="text-center italic text-gray-400">No cosmic knowledge shared yet. Be the first!</p>';
+                } else {
+                    let factsHTML = '';
+                    facts.forEach(fact => {
+                        factsHTML += `
+                            <div class="p-2 bg-gray-800 rounded-lg border border-gray-600">
+                                <p class="text-gray-300">${fact.text}</p>
+                                <p class="text-right text-sm font-bold text-purple-300">- ${fact.author}</p>
+                            </div>
+                        `;
+                    });
+                    factWall.innerHTML = factsHTML;
+                }
+                
+                factCount.textContent = `Total facts: ${facts.length}`;
+            }
+            
+            // Reset facts
+            resetFactsButton.addEventListener('click', () => {
+                if (confirm('Are you sure you want to clear all cosmic knowledge?')) {
+                    facts = [];
+                    updateFactWall();
+                }
+            });
+            
+            // Reset stats
+            const resetStatsButton = document.getElementById('reset-stats-button');
+            
+            resetStatsButton.addEventListener('click', () => {
+                if (confirm('Are you sure you want to reset all explorer stats?')) {
+                    document.querySelector('.q1-b-count').textContent = '0';
+                    document.querySelector('.q2-c-count').textContent = '0';
+                    document.querySelector('.q3-a-count').textContent = '0';
+                    document.querySelector('.q4-b-count').textContent = '0';
+                    document.getElementById('total-players').textContent = 'Total explorers: 0';
+                    document.getElementById('percentile').textContent = '0%';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
