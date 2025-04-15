@@ -168,6 +168,17 @@
             margin-bottom: 1rem;
         }
         
+        .stats-display {
+            display: flex;
+            justify-content: space-between;
+            text-align: center;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            background-color: rgba(52, 152, 219, 0.1);
+            padding: 0.5rem;
+            border-radius: 5px;
+        }
+        
         .dyson-sphere-container {
             position: relative;
             width: 300px;
@@ -252,14 +263,6 @@
             color: var(--success);
         }
         
-        .quote {
-            font-style: italic;
-            margin: 1.5rem 0;
-            padding: 1rem;
-            background-color: rgba(52, 152, 219, 0.1);
-            border-left: 4px solid var(--secondary);
-        }
-        
         /* Animation for panels */
         @keyframes rotatePanel {
             from { transform: rotate(0deg); }
@@ -271,6 +274,11 @@
     <div class="container">
         <h1>Dyson Sphere Explorer</h1>
         <p class="score-display">Score: <span id="score">0</span></p>
+        <div class="stats-display">
+            <div>Concept Answers: <span id="concept-count">0</span></div>
+            <div>Feasibility Answers: <span id="feasibility-count">0</span></div>
+            <div>Importance Answers: <span id="importance-count">0</span></div>
+        </div>
         <div class="progress-container">
             <div class="progress-bar" id="progressBar"></div>
         </div>
@@ -278,52 +286,48 @@
         <!-- Introduction Section -->
         <div class="game-section active" id="intro">
             <h2>Welcome, Cosmic Engineer!</h2>
-            <p>Ah, the boundless cosmos beckons to the insatiably curious mind. You've been selected—through a process far too tedious to explain—to explore one of humanity's most audacious concepts: the <strong>Dyson Sphere</strong>.</p>
-            <p>This little adventure will test your knowledge, challenge your assumptions, and possibly leave you questioning why we're not already harvesting the boundless energy of our rather average yellow star.</p>
-            <p>As we navigate through this cosmic engineering daydream, you'll learn:</p>
+            <p>You've been selected to explore the <strong>Dyson Sphere</strong> concept - one of humanity's most ambitious ideas for harnessing stellar energy.</p>
+            <p>In this quick adventure, you'll learn:</p>
             <ul>
-                <li>What exactly a Dyson Sphere is (hint: not a vacuum cleaner in space)</li>
-                <li>Whether we could actually build one (spoiler: it's complicated)</li>
-                <li>Why anyone should care about such an outlandish concept</li>
+                <li>What a Dyson Sphere is</li>
+                <li>If we could build one</li>
+                <li>Why this concept matters</li>
             </ul>
-            <p>Are you ready to harness the power of an entire star? Of course you are.</p>
             <p class="resource-counter">Resources: <span id="resources">100</span> units</p>
             <div class="clearfix">
-                <button class="btn btn-next" onclick="showSection('concept')">Begin the Adventure →</button>
+                <button class="btn btn-next" onclick="showSection('concept')">Begin →</button>
             </div>
         </div>
         
         <!-- Concept Section -->
         <div class="game-section" id="concept">
             <h2>The Concept: What is a Dyson Sphere?</h2>
-            <p>Before we start building cosmic megastructures willy-nilly, let's clarify what we're discussing:</p>
             
             <div class="dyson-sphere-container">
                 <div class="star"></div>
                 <!-- Dyson components will be added by JavaScript -->
             </div>
             
-            <p>In 1960, a physicist named Freeman Dyson proposed something rather ambitious. He suggested that sufficiently advanced civilizations might build enormous structures to capture most or all of a star's energy output.</p>
-            <p>Now, what do you think Dyson actually proposed?</p>
+            <p>In 1960, Freeman Dyson proposed that advanced civilizations might build enormous structures to capture a star's energy output.</p>
+            <p>What did Dyson actually propose?</p>
             
             <div class="options">
                 <div class="option" onclick="selectOption(this, 'concept', false)">
-                    <p>A solid sphere completely enclosing a star</p>
+                    <p>A solid sphere enclosing a star</p>
                 </div>
                 <div class="option" onclick="selectOption(this, 'concept', true)">
-                    <p>A swarm of orbiting solar collectors around a star</p>
+                    <p>A swarm of orbiting solar collectors</p>
                 </div>
                 <div class="option" onclick="selectOption(this, 'concept', false)">
-                    <p>A planet-sized machine designed to extract energy from stars</p>
+                    <p>A planet-sized energy extraction machine</p>
                 </div>
                 <div class="option" onclick="selectOption(this, 'concept', false)">
-                    <p>A theoretical vacuum cleaner that works in space</p>
+                    <p>A space vacuum cleaner</p>
                 </div>
             </div>
             
             <div class="feedback" id="concept-feedback">
-                <p>Common misconception alert! While popular culture often depicts Dyson Spheres as solid shells (looking at you, science fiction), Freeman Dyson actually proposed a "swarm" of orbiting structures or satellites designed to capture a star's energy. A solid sphere would face rather troublesome engineering challenges—like, you know, collapsing under its own gravity.</p>
-                <p>The term "Dyson Sphere" has evolved to encompass several variations: swarms, rings, bubbles, and even the implausible solid sphere. What they share is the fundamental goal: capturing as much stellar energy as possible.</p>
+                <p>While often depicted as solid shells in science fiction, Dyson actually proposed a "swarm" of orbiting structures to capture stellar energy. A solid sphere would face enormous engineering challenges and likely collapse under its own gravity.</p>
             </div>
             
             <div class="clearfix">
@@ -334,37 +338,27 @@
         
         <!-- Feasibility Section -->
         <div class="game-section" id="feasibility">
-            <h2>The Feasibility: Could We Actually Build One?</h2>
-            <p>Now that we're all properly acquainted with the concept, let's address the elephant in the solar system: Could we actually construct such a thing?</p>
+            <h2>The Feasibility: Could We Build One?</h2>
             
-            <p>What do you think is the most significant challenge to building a Dyson Sphere or Swarm?</p>
+            <p>What's the biggest challenge to building a Dyson Sphere or Swarm?</p>
             
             <div class="options">
                 <div class="option" onclick="selectOption(this, 'feasibility', false)">
-                    <p>Finding the right star to enclose</p>
+                    <p>Finding the right star</p>
                 </div>
                 <div class="option" onclick="selectOption(this, 'feasibility', false)">
-                    <p>Developing the technology to capture solar energy efficiently</p>
+                    <p>Solar energy capture technology</p>
                 </div>
                 <div class="option" onclick="selectOption(this, 'feasibility', true)">
-                    <p>Acquiring enough material to build the structure</p>
+                    <p>Acquiring enough building material</p>
                 </div>
                 <div class="option" onclick="selectOption(this, 'feasibility', false)">
-                    <p>Getting international cooperation for the project</p>
+                    <p>International cooperation</p>
                 </div>
             </div>
             
             <div class="feedback" id="feasibility-feedback">
-                <p>Indeed, materials present the most staggering challenge. Even for a relatively modest Dyson Swarm (rather than a complete sphere), we'd need an absolutely preposterous amount of material.</p>
-                <p>How much, you ask? Well, dismantling Mercury might be a good start. Yes, the entire planet. And that would only get us a partial swarm. A complete sphere would require materials equivalent to several planets.</p>
-                <p>Other significant challenges include:</p>
-                <ul>
-                    <li>Launching and positioning millions of collectors</li>
-                    <li>Ensuring structural stability</li>
-                    <li>Maintaining stable orbits</li>
-                    <li>Transmitting all that energy to where it's needed</li>
-                </ul>
-                <p>In other words, it's just <em>slightly</em> beyond our current technological capabilities. Just slightly.</p>
+                <p>Materials present the most staggering challenge. Even for a modest Dyson Swarm, we'd need to dismantle entire planets like Mercury - and that would only get us a partial structure. Other challenges include launching millions of collectors, ensuring stability, and transmitting the energy.</p>
             </div>
             
             <div class="clearfix">
@@ -376,60 +370,50 @@
         <!-- Importance Section -->
         <div class="game-section" id="importance">
             <h2>The Importance: Why Should We Care?</h2>
-            <p>So it's a wildly impractical megastructure that requires dismantling planets. Why should we devote even a moment's thought to such cosmic grandiosity?</p>
             
-            <p>What is the most compelling reason to consider Dyson Spheres as a concept?</p>
+            <p>What's the most compelling reason to consider Dyson Spheres?</p>
             
             <div class="options">
                 <div class="option" onclick="selectOption(this, 'importance', false)">
-                    <p>To shield Earth from harmful solar radiation</p>
+                    <p>Shielding Earth from radiation</p>
                 </div>
                 <div class="option" onclick="selectOption(this, 'importance', true)">
-                    <p>Energy needs for an advanced civilization</p>
+                    <p>Energy needs for advanced civilizations</p>
                 </div>
                 <div class="option" onclick="selectOption(this, 'importance', false)">
-                    <p>As a thought experiment for science fiction writers</p>
+                    <p>Science fiction story ideas</p>
                 </div>
                 <div class="option" onclick="selectOption(this, 'importance', false)">
-                    <p>To create new habitable space for humanity</p>
+                    <p>Creating new habitable space</p>
                 </div>
             </div>
             
             <div class="feedback" id="importance-feedback">
-                <p>Energy—it's always about energy. A completed Dyson structure could capture up to 400 septillion watts from our sun. That's approximately 2.3 trillion times the current energy consumption of humanity.</p>
-                <p>It represents a critical transition in the Kardashev Scale—a method of measuring a civilization's technological advancement based on energy utilization. A Dyson Sphere would elevate us from a Type I civilization (using energy available on our planet) to a Type II civilization (harnessing the energy of an entire star).</p>
-                <p>Beyond our own energy needs, Dyson Spheres also matter for:</p>
-                <ul>
-                    <li>Searching for extraterrestrial intelligence (Dyson Spheres might be detectable around distant stars)</li>
-                    <li>Understanding the ultimate limits of technological civilizations</li>
-                    <li>Preparing for the extremely long-term future of humanity</li>
-                </ul>
-                <p>In essence, they represent the logical endpoint of our ever-increasing energy demands, assuming we don't destroy ourselves first (which, admittedly, seems the more likely scenario at present).</p>
+                <p>Energy is key. A Dyson structure could capture up to 400 septillion watts from our sun - about 2.3 trillion times humanity's current energy consumption. It represents a transition from a Type I civilization (planetary energy) to Type II (stellar energy) on the Kardashev Scale.</p>
             </div>
             
             <div class="clearfix">
                 <button class="btn btn-prev" onclick="showSection('feasibility')">← Back</button>
-                <button class="btn btn-next" id="importance-next" style="display: none;" onclick="showSection('build'); completeDysonSwarm();">Let's Build One! →</button>
+                <button class="btn btn-next" id="importance-next" style="display: none;" onclick="showSection('build'); completeDysonSwarm();">Let's Build! →</button>
             </div>
         </div>
         
         <!-- Build Section -->
         <div class="game-section" id="build">
-            <h2>Let's Build a Dyson Swarm!</h2>
-            <p>Now that you're thoroughly educated on this cosmic engineering marvel, let's simulate building a modest Dyson Swarm:</p>
+            <h2>Build Your Dyson Swarm!</h2>
             
             <div class="dyson-sphere-container" id="buildContainer">
                 <div class="star"></div>
                 <!-- Panels will be added by JavaScript -->
             </div>
             
-            <p>You have 100 resource units to allocate. Choose wisely:</p>
+            <p>You have 100 resource units. Choose wisely:</p>
             
             <div class="options">
-                <button class="btn" onclick="allocateResources('satellites', 20)">Build Solar Satellites (-20 units)</button>
-                <button class="btn" onclick="allocateResources('energy', 30)">Improve Energy Collection (-30 units)</button>
-                <button class="btn" onclick="allocateResources('transmission', 25)">Enhance Energy Transmission (-25 units)</button>
-                <button class="btn" onclick="allocateResources('stability', 35)">Improve Orbital Stability (-35 units)</button>
+                <button class="btn" onclick="allocateResources('satellites', 20)">Solar Satellites (-20)</button>
+                <button class="btn" onclick="allocateResources('energy', 30)">Energy Collection (-30)</button>
+                <button class="btn" onclick="allocateResources('transmission', 25)">Energy Transmission (-25)</button>
+                <button class="btn" onclick="allocateResources('stability', 35)">Orbital Stability (-35)</button>
             </div>
             
             <p class="resource-counter">Resources: <span id="resources-build">100</span> units</p>
@@ -445,28 +429,19 @@
         <div class="game-section" id="conclusion">
             <h2>Congratulations, Cosmic Engineer!</h2>
             <div class="congratulations">
-                <h3>Your Final Score: <span id="final-score">0</span>/100</h3>
-                <p>Energy Capture Efficiency: <span id="final-energy">0</span>%</p>
+                <h3>Final Score: <span id="final-score">0</span>/100</h3>
+                <p>Energy Capture: <span id="final-energy">0</span>%</p>
+                <p>Total Responses: <span id="total-responses">0</span></p>
             </div>
             
-            <div class="quote">
-                <p>"For a successful technology, reality must take precedence over public relations, for nature cannot be fooled." — Richard Feynman</p>
-            </div>
+            <p>Dyson Spheres remain speculative, but the concept pushes us to think about humanity's potential future - harnessing the full energy of a star system instead of just a planet.</p>
             
-            <p>What have we learned through this ambitious cosmic engineering exercise?</p>
-            
-            <p>Dyson Spheres remain firmly in the realm of speculative engineering for now. However, the concept pushes us to think about humanity's future on the grandest scale—a civilization that doesn't just inhabit a planet, but harnesses the full potential of a star system.</p>
-            
-            <p>Perhaps even more valuable than the megastructure itself, the Dyson Sphere concept helps us understand:</p>
+            <p>Key takeaways:</p>
             <ul>
-                <li>The staggering scale of available energy in our cosmic neighborhood</li>
-                <li>The potential trajectory of technological civilizations</li>
-                <li>Our relative infancy as a technological species</li>
+                <li>The scale of available energy in our cosmic neighborhood is staggering</li>
+                <li>We're still in the infancy of our technological journey</li>
+                <li>Such megastructures represent logical endpoints of our energy needs</li>
             </ul>
-            
-            <p>Whether we ever build a Dyson Sphere (or more likely, a partial swarm), the concept remains one of humanity's most breathtaking ideas—a testament to our ability to envision the seemingly impossible.</p>
-            
-            <p>Now go forth and explain to your friends why they should seriously consider investing in solar collector technology. The stars await!</p>
             
             <button class="btn btn-restart" onclick="restartGame()">Play Again</button>
         </div>
@@ -481,6 +456,13 @@
         };
         let resources = 100;
         let energyCollected = 0;
+        
+        // Response counters
+        let responseCounts = {
+            'concept': 0,
+            'feasibility': 0,
+            'importance': 0
+        };
         
         // Game progression
         function showSection(sectionId) {
@@ -503,6 +485,14 @@
             
             // Mark question as answered
             questionAnswered[questionId] = true;
+            
+            // Increment response counter for this section
+            responseCounts[questionId]++;
+            document.getElementById(questionId + '-count').textContent = responseCounts[questionId];
+            
+            // Calculate total responses
+            const totalResponses = Object.values(responseCounts).reduce((a, b) => a + b, 0);
+            document.getElementById('total-responses').textContent = totalResponses;
             
             // Remove any previous selections
             document.querySelectorAll('#' + questionId + ' .option').forEach(opt => {
@@ -548,9 +538,9 @@
         // Get correct answer text for each question
         function getCorrectAnswer(questionId) {
             const answers = {
-                'concept': 'A swarm of orbiting solar collectors around a star',
-                'feasibility': 'Acquiring enough material to build the structure',
-                'importance': 'Energy needs for an advanced civilization'
+                'concept': 'A swarm of orbiting solar collectors',
+                'feasibility': 'Acquiring enough building material',
+                'importance': 'Energy needs for advanced civilizations'
             };
             return answers[questionId];
         }
