@@ -1020,17 +1020,24 @@
             showSection('intro');
         }
 
-        // --- NEW Mailto Function ---
+        // --- Mailto Function ---
         function generateMailtoLink() {
-            // !!! IMPORTANT: Replace this with the actual recipient email address !!!
-            const recipientEmail = "YOUR_EMAIL_ADDRESS_HERE@example.com";
+            // ###############################################################
+            // #                                                             #
+            // #    !!!   IMPORTANT: YOU MUST EDIT THIS LINE BELOW   !!!     #
+            // #                                                             #
+            // # Replace "YOUR_EMAIL_ADDRESS_HERE@example.com" with the      #
+            // # actual email address where you want the results sent.       #
+            // # Otherwise, the 'Email Results' button won't work correctly. #
+            // #                                                             #
+            // ###############################################################
+            const recipientEmail = "jessesrothman@gmail.com";
 
             // --- Gather data ---
-            const finalName = nameInput.value.trim() || userName; // Use entered name or default
+            const finalName = nameInput.value.trim() || userName;
             const finalScore = score;
             const finalEnergy = energyCollected;
-            // Retrieve the latest responses from localStorage (or the current array)
-            const currentResponses = loadFactsFromStorage(); // Load fresh data
+            const currentResponses = loadFactsFromStorage();
 
             // --- Format email body ---
             let emailBody = `Cosmic Curiosity Results for Mary!\n`;
@@ -1040,8 +1047,7 @@
             emailBody += `--- Wall of Facts & Curiosities ---\n\n`;
 
             if (currentResponses.length > 0) {
-                // Iterate in reverse to show oldest first in email (opposite of wall)
-                for (let i = currentResponses.length - 1; i >= 0; i--) {
+                for (let i = currentResponses.length - 1; i >= 0; i--) { // Oldest first in email
                     const entry = currentResponses[i];
                     emailBody += `"${entry.text}" - ${entry.name} (${entry.isFact ? 'Fact' : 'Thought/Idea'})\n\n`;
                 }
@@ -1059,14 +1065,15 @@
             // --- Construct mailto link ---
             const mailtoLink = `mailto:${recipientEmail}?subject=${encodedSubject}&body=${encodedBody}`;
 
-            // --- Check length (optional but recommended) ---
-            const MAX_MAILTO_LENGTH = 2000; // A common approximate limit
+            // --- Check length ---
+            const MAX_MAILTO_LENGTH = 2000;
             if (mailtoLink.length > MAX_MAILTO_LENGTH) {
                 alert("Warning: The collected results are very long and might exceed email link limits. The email draft might be incomplete or fail to open.");
             }
 
             // --- Open email client ---
-            // This attempts to open the user's default email client
+            // Note: This relies on the user having a default email client configured.
+            // It opens a DRAFT email; the user MUST click 'Send'.
             window.location.href = mailtoLink;
         }
 
@@ -1149,6 +1156,7 @@
     </script>
 </body>
 </html>
+
 
 
 
