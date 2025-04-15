@@ -141,8 +141,8 @@
         .btn-next { background-color: var(--accent); float: right; }
         .btn-prev { background-color: var(--info); float: left; }
         .btn-submit { background-color: var(--success); display: block; margin: 1rem auto; }
-        .btn-restart { background-color: var(--primary); display: block; margin: 1rem auto; }
-        .btn-email { background-color: var(--info); display: block; margin: 1rem auto; } /* Style for email button */
+        .btn-restart { background-color: var(--primary); display: block; margin: 1rem auto; } /* Style retained but button removed */
+        .btn-email { background-color: var(--info); display: block; margin: 1rem auto; } /* Style retained but button removed */
 
 
         /* Options for multiple choice */
@@ -682,9 +682,7 @@
                 "Science fair is an invitation to follow your curiosity. The point is JOY, so only do this if it feels fun!" - Mary
             </div>
 
-            <button class="btn btn-email" onclick="generateMailtoLink()">Email Results (Opens Email App)</button>
-            <button class="btn btn-restart" onclick="restartGame()">Start Over</button>
-             <div class="clearfix"> <button class="btn btn-prev" onclick="showSection('collected-wishes')">← Back</button>
+            <div class="clearfix"> <button class="btn btn-prev" onclick="showSection('collected-wishes')">← Back</button>
              </div>
         </div>
     </div>
@@ -1353,8 +1351,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
