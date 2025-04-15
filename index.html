@@ -141,6 +141,8 @@
         .btn-prev { background-color: var(--info); float: left; }
         .btn-submit { background-color: var(--success); display: block; margin: 1rem auto; }
         .btn-restart { background-color: var(--primary); display: block; margin: 1rem auto; }
+        .btn-email { background-color: var(--info); display: block; margin: 1rem auto; } /* Style for email button */
+
 
         /* Options for multiple choice */
         .options {
@@ -463,7 +465,7 @@
 
     <div class="container">
         <div class="birthday-banner">
-            <p><span class="sparkle">✨</span> For Mary's Birthday Science Fair! <span class="sparkle">✨</span></p>
+            <p><span class="sparkle">✨</span> For Mary's Earth Day Birthday Science Fair! <span class="sparkle">✨</span></p>
         </div>
 
         <h1>Cosmic Curiosity Explorer</h1>
@@ -639,6 +641,7 @@
                 "Science fair is an invitation to follow your curiosity. The point is JOY, so only do this if it feels fun!" - Mary
             </div>
 
+            <button class="btn btn-email" onclick="generateMailtoLink()">Email Results (Opens Email App)</button>
             <button class="btn btn-restart" onclick="restartGame()">Start Over</button>
         </div>
     </div>
@@ -693,22 +696,19 @@
             const storedFacts = localStorage.getItem(LOCAL_STORAGE_KEY);
             if (storedFacts) {
                 try {
-                    // Attempt to parse stored data
                     const parsedFacts = JSON.parse(storedFacts);
-                    // Basic validation: check if it's an array
                     if (Array.isArray(parsedFacts)) {
                         return parsedFacts;
                     } else {
                         console.warn("Stored facts data is not an array. Resetting to defaults.");
-                        return [...STARTER_FACTS]; // Return a copy
+                        return [...STARTER_FACTS];
                     }
                 } catch (error) {
                     console.error("Error parsing stored facts:", error, "Resetting to defaults.");
-                    return [...STARTER_FACTS]; // Return a copy on error
+                    return [...STARTER_FACTS];
                 }
             }
-            // If nothing is stored, return default starter facts
-            return [...STARTER_FACTS]; // Return a copy
+            return [...STARTER_FACTS];
         }
 
         function saveFactsToStorage() {
@@ -716,7 +716,6 @@
                 localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(collectedResponses));
             } catch (error) {
                  console.error("Error saving facts to localStorage:", error);
-                 // Handle potential storage errors (e.g., quota exceeded) if necessary
             }
         }
 
@@ -727,27 +726,19 @@
 
         // --- Initial Setup ---
         window.onload = function() {
-            // Load facts from localStorage or use defaults
             collectedResponses = loadFactsFromStorage();
-
-            // Save the initial state (either loaded or default) back to storage
-            // This ensures defaults are saved on the very first run
-            saveFactsToStorage();
-
-            // Populate the visible wall from the loaded/initialized data
+            saveFactsToStorage(); // Ensure defaults are saved on first run
             populateFactWall();
-
-            // Initialize other UI elements
             updateScoreDisplay();
             updateBuildResourcesDisplay();
-            showSection('intro'); // Start at intro
+            showSection('intro');
         };
 
         // --- Core Functions ---
 
         function populateFactWall() {
-            factWall.innerHTML = ''; // Clear the wall first
-            // Add facts from the collectedResponses array
+            factWall.innerHTML = '';
+            // Display in reverse order of storage (newest first)
             collectedResponses.forEach(fact => addFactToWall(fact.text, fact.name, fact.isFact));
         }
 
@@ -764,24 +755,19 @@
                 return;
             }
 
-            // Update progress bar
             const sections = ['intro', 'concept', 'feasibility', 'importance', 'build', 'conclusion'];
             const currentIndex = sections.indexOf(sectionId);
             const progressPercent = (currentIndex / (sections.length - 1)) * 100;
             progressBar.style.width = progressPercent + '%';
 
-            // Update visual containers
             updateCosmicVisuals(sectionId);
 
-            // If entering build section, sync resource display and button states
             if (sectionId === 'build') {
                 updateBuildResourcesDisplay();
                 updateBuildButtons();
             }
-
-             // If entering conclusion, ensure the wall reflects the latest data
              if (sectionId === 'conclusion') {
-                 finalizeResults(); // This function now also repopulates the wall
+                 finalizeResults();
              }
         }
 
@@ -853,24 +839,14 @@
 
         function getFeedbackText(questionId, isCorrect) {
             switch (questionId) {
-                case 'concept':
-                    return isCorrect
-                        ? "Dyson proposed a 'swarm' of collectors. A solid shell is likely unstable!"
-                        : "While sci-fi loves solid shells, Dyson proposed a 'swarm' of many collectors. A solid shell would face huge gravitational stress!";
-                case 'feasibility':
-                    return isCorrect
-                        ? "Exactly! The sheer amount of material needed is staggering - maybe needing entire planets!"
-                        : "While other factors are tricky, getting enough *stuff* (materials) is the biggest hurdle. We might need to dismantle planets!";
-                case 'importance':
-                    return isCorrect
-                        ? "Right! It represents the ultimate energy goal for advanced civilizations and could be a sign of alien life (technosignature)."
-                        : "The main idea is capturing nearly ALL a star's energy. It's also a potential 'technosignature' – a sign of advanced alien tech.";
+                case 'concept': return isCorrect ? "Dyson proposed a 'swarm' of collectors. A solid shell is likely unstable!" : "While sci-fi loves solid shells, Dyson proposed a 'swarm' of many collectors. A solid shell would face huge gravitational stress!";
+                case 'feasibility': return isCorrect ? "Exactly! The sheer amount of material needed is staggering - maybe needing entire planets!" : "While other factors are tricky, getting enough *stuff* (materials) is the biggest hurdle. We might need to dismantle planets!";
+                case 'importance': return isCorrect ? "Right! It represents the ultimate energy goal for advanced civilizations and could be a sign of alien life (technosignature)." : "The main idea is capturing nearly ALL a star's energy. It's also a potential 'technosignature' – a sign of advanced alien tech.";
                 default: return "";
             }
         }
 
         function submitResponse(sectionId) {
-            // Allow multiple submissions in 'build' section, but only one in others
             if (sectionId !== 'build' && sectionState[sectionId].submitted) return;
 
             const thoughtInput = document.getElementById(`${sectionId}-thought`);
@@ -879,46 +855,36 @@
             const isNotFact = isNotFactCheckbox.checked;
 
             if (thoughtText) {
-                const currentName = nameInput.value.trim() || userName; // Use entered name if available
+                const currentName = nameInput.value.trim() || userName;
                 const newEntry = { text: thoughtText, name: currentName, isFact: !isNotFact };
 
-                // Add to the start of the array (newest first)
-                collectedResponses.unshift(newEntry);
+                collectedResponses.unshift(newEntry); // Add to start of array
                 addFactToWall(newEntry.text, newEntry.name, newEntry.isFact); // Add visually
-                saveFactsToStorage(); // <<-- SAVE TO LOCALSTORAGE
+                saveFactsToStorage(); // Save updated array
 
                 thoughtInput.value = '';
                 isNotFactCheckbox.checked = false;
-                sectionState[sectionId].submitted = true; // Mark section as submitted (except build)
+                sectionState[sectionId].submitted = true;
 
                 const submitButton = thoughtInput.closest('.form-group').querySelector('.btn-submit');
                  if (submitButton) {
-                    const originalText = submitButton.textContent; // Store original text
+                    const originalText = submitButton.textContent;
                     submitButton.textContent = 'Added!';
-                    submitButton.disabled = (sectionId !== 'build'); // Only disable if not build section
-                    setTimeout(() => {
-                         // Reset button text, keep disabled state based on section
-                         submitButton.textContent = originalText;
-                    }, 1500);
+                    submitButton.disabled = (sectionId !== 'build');
+                    setTimeout(() => { submitButton.textContent = originalText; }, 1500);
                  }
-
                  score += 5;
                  updateScoreDisplay();
-
             } else {
                 alert("Please share a thought or fact first!");
             }
         }
 
-
         function addFactToWall(text, name, isFact) {
             const li = document.createElement('li');
             li.innerHTML = `${text} <span class="fact-attribution">- ${name} ${isFact ? '(Fact)' : '(Thought/Idea)'}</span>`;
-             if (!isFact) {
-                li.classList.add('not-fact');
-             }
-            // Prepend to show newest first visually
-            factWall.insertBefore(li, factWall.firstChild);
+             if (!isFact) li.classList.add('not-fact');
+            factWall.insertBefore(li, factWall.firstChild); // Prepend
         }
 
         function allocateResources(type, cost) {
@@ -938,16 +904,15 @@
 
          function updateBuildButtons() {
             document.querySelectorAll('.build-btn').forEach(button => {
-                const costText = button.textContent.match(/-(\d+)/); // Find cost in button text
+                const costText = button.textContent.match(/-(\d+)/);
                 if (costText && costText[1]) {
                     const cost = parseInt(costText[1]);
                     button.disabled = currentResources < cost;
                 } else {
-                    button.disabled = false; // Default to enabled if cost not found
+                    button.disabled = false;
                 }
             });
         }
-
 
         function submitFinalThought() {
              if (sectionState.final.submitted) return;
@@ -966,9 +931,9 @@
 
              if (finalThoughtText) {
                  const newEntry = { text: finalThoughtText, name: userName, isFact: !isNotFact };
-                 collectedResponses.unshift(newEntry); // Add to start
-                 addFactToWall(newEntry.text, newEntry.name, newEntry.isFact); // Add visually
-                 saveFactsToStorage(); // <<-- SAVE TO LOCALSTORAGE
+                 collectedResponses.unshift(newEntry);
+                 addFactToWall(newEntry.text, newEntry.name, newEntry.isFact);
+                 saveFactsToStorage(); // Save updated array
                  finalThoughtInput.value = '';
                  isNotFactCheckbox.checked = false;
              }
@@ -986,26 +951,19 @@
             finalScoreDisplay.textContent = score;
             finalEnergyDisplay.textContent = energyCollected + '%';
             displayName.textContent = nameInput.value.trim() || userName;
-
-             // Refresh the wall from the current (potentially updated) collectedResponses
-             populateFactWall();
+            populateFactWall(); // Ensure wall is up-to-date
         }
 
 
         function restartGame() {
-            // --- Clear persistent storage ---
-            clearStoredFacts();
-
-            // --- Reset state variables ---
+            clearStoredFacts(); // Clear localStorage
             score = 0;
             currentResources = 100;
             energyCollected = 0;
             userName = "Explorer";
             buildAllocations = { satellites: 0, energy: 0, transmission: 0, stability: 0 };
-             // Reset collected responses to starter facts
-            collectedResponses = [...STARTER_FACTS]; // Use a copy
-            // Save the reset state (starter facts) back to storage
-            saveFactsToStorage();
+            collectedResponses = [...STARTER_FACTS]; // Reset to starter facts
+            saveFactsToStorage(); // Save the reset state
 
             sectionState = { // Reset section states
                  'concept': { answered: false, submitted: false },
@@ -1015,7 +973,7 @@
                  'final': { submitted: false }
             };
 
-            // --- Reset UI elements ---
+            // Reset UI elements
             updateScoreDisplay();
             updateBuildResourcesDisplay();
             updateEnergyCollectedDisplay();
@@ -1026,11 +984,10 @@
             document.getElementById('build-thought').value = '';
             document.getElementById('build-fact-check').checked = false;
 
-
             // Reset question sections UI
             ['concept', 'feasibility', 'importance'].forEach(id => {
                 document.getElementById(`${id}-feedback`).style.display = 'none';
-                document.getElementById(`${id}-feedback`).innerHTML = ''; // Clear feedback text
+                document.getElementById(`${id}-feedback`).innerHTML = '';
                 document.getElementById(`${id}-response`).style.display = 'none';
                 document.getElementById(`${id}-next`).style.display = 'none';
                 document.getElementById(`${id}-thought`).value = '';
@@ -1040,55 +997,90 @@
                 optionsContainer.querySelectorAll('.option').forEach(opt => {
                     opt.classList.remove('selected', 'correct', 'incorrect', 'disabled');
                     opt.style.opacity = '1';
-                     // Basic re-attachment of click handler (assumes simple structure)
                      const args = opt.getAttribute('onclick')?.match(/'([^']*)',\s*(true|false)/);
-                     if (args) {
-                         opt.onclick = () => selectOption(opt, args[1], args[2] === 'true');
-                     }
+                     if (args) { opt.onclick = () => selectOption(opt, args[1], args[2] === 'true'); }
                 });
                  const submitBtn = document.getElementById(`${id}-response`).querySelector('.btn-submit');
-                 if (submitBtn) {
-                    submitBtn.textContent = 'Add to Collection';
-                    submitBtn.disabled = false;
-                 }
+                 if (submitBtn) { submitBtn.textContent = 'Add to Collection'; submitBtn.disabled = false; }
             });
 
              // Reset build section UI
              updateBuildButtons();
              clearCosmicVisuals('buildContainer');
              const buildSubmitBtn = document.getElementById('build-response').querySelector('.btn-submit');
-             if (buildSubmitBtn) {
-                 buildSubmitBtn.textContent = 'Add to Wall of Facts';
-                 buildSubmitBtn.disabled = false; // Re-enable build submit
-             }
+             if (buildSubmitBtn) { buildSubmitBtn.textContent = 'Add to Wall of Facts'; buildSubmitBtn.disabled = false; }
 
              // Reset final section UI
              const finalSubmitBtn = document.getElementById('conclusion').querySelector('.btn-submit');
-             if (finalSubmitBtn) {
-                 finalSubmitBtn.textContent = 'Submit & Celebrate!';
-                 finalSubmitBtn.disabled = false;
-             }
+             if (finalSubmitBtn) { finalSubmitBtn.textContent = 'Submit & Celebrate!'; finalSubmitBtn.disabled = false; }
 
-            // --- Refresh Wall and Start Over ---
-            populateFactWall(); // Re-populate wall with starter facts
+            // Refresh Wall and Start Over
+            populateFactWall();
             stopConfetti();
             showSection('intro');
         }
 
+        // --- NEW Mailto Function ---
+        function generateMailtoLink() {
+            // !!! IMPORTANT: Replace this with the actual recipient email address !!!
+            const recipientEmail = "YOUR_EMAIL_ADDRESS_HERE@example.com";
+
+            // --- Gather data ---
+            const finalName = nameInput.value.trim() || userName; // Use entered name or default
+            const finalScore = score;
+            const finalEnergy = energyCollected;
+            // Retrieve the latest responses from localStorage (or the current array)
+            const currentResponses = loadFactsFromStorage(); // Load fresh data
+
+            // --- Format email body ---
+            let emailBody = `Cosmic Curiosity Results for Mary!\n`;
+            emailBody += `Submitted by: ${finalName}\n\n`;
+            emailBody += `Final Fun Points: ${finalScore}\n`;
+            emailBody += `Energy Collection: ${finalEnergy}%\n\n`;
+            emailBody += `--- Wall of Facts & Curiosities ---\n\n`;
+
+            if (currentResponses.length > 0) {
+                // Iterate in reverse to show oldest first in email (opposite of wall)
+                for (let i = currentResponses.length - 1; i >= 0; i--) {
+                    const entry = currentResponses[i];
+                    emailBody += `"${entry.text}" - ${entry.name} (${entry.isFact ? 'Fact' : 'Thought/Idea'})\n\n`;
+                }
+            } else {
+                emailBody += "(No facts or thoughts were submitted)\n";
+            }
+
+            // --- Format subject ---
+            const emailSubject = `Cosmic Curiosity Results from ${finalName}`;
+
+            // --- Encode components for URL ---
+            const encodedSubject = encodeURIComponent(emailSubject);
+            const encodedBody = encodeURIComponent(emailBody);
+
+            // --- Construct mailto link ---
+            const mailtoLink = `mailto:${recipientEmail}?subject=${encodedSubject}&body=${encodedBody}`;
+
+            // --- Check length (optional but recommended) ---
+            const MAX_MAILTO_LENGTH = 2000; // A common approximate limit
+            if (mailtoLink.length > MAX_MAILTO_LENGTH) {
+                alert("Warning: The collected results are very long and might exceed email link limits. The email draft might be incomplete or fail to open.");
+            }
+
+            // --- Open email client ---
+            // This attempts to open the user's default email client
+            window.location.href = mailtoLink;
+        }
+
 
         // --- Visual Effect Functions ---
-
         function updateCosmicVisuals(sectionId) {
             ['conceptContainer', 'feasibilityContainer', 'importanceContainer', 'buildContainer'].forEach(clearCosmicVisuals);
             const container = document.getElementById(`${sectionId}Container`);
             if (!container) return;
-
             if (sectionId === 'concept') { /* Basic star */ }
             else if (sectionId === 'feasibility') addCosmicRing(container);
             else if (sectionId === 'importance') { addCosmicRing(container); addMorePanels(container, 5); }
             else if (sectionId === 'build') completeDysonSwarmVisual(container);
         }
-
         function clearCosmicVisuals(containerId) {
              const container = document.getElementById(containerId);
              if (container) {
@@ -1096,7 +1088,6 @@
                  elementsToRemove.forEach(el => el.remove());
              }
         }
-
         function addCosmicRing(targetContainer = document.getElementById('feasibilityContainer')) {
              if (!targetContainer) return;
              clearCosmicVisuals(targetContainer.id);
@@ -1106,11 +1097,9 @@
              void ring.offsetWidth; // Trigger reflow
              ring.style.opacity = '1';
         }
-
         function addMorePanels(targetContainer = document.getElementById('importanceContainer'), count = 5) {
              if (!targetContainer) return;
              if (!targetContainer.querySelector('.cosmic-ring')) addCosmicRing(targetContainer);
-
              const radius = 100;
              for (let i = 0; i < count; i++) {
                  const angle = (i / count) * 2 * Math.PI;
@@ -1124,30 +1113,25 @@
                  panel.style.opacity = '0.7';
              }
         }
-
          function addPanelToVisual() {
              const container = document.getElementById('buildContainer');
              if (!container) return;
              const panelCount = container.querySelectorAll('.cosmic-panel').length;
              if (panelCount >= MAX_PANELS) return;
-
              const radius = 100;
              const angle = (panelCount / MAX_PANELS) * 2 * Math.PI + Math.random() * 0.5 - 0.25;
              const x = radius * Math.cos(angle);
              const y = radius * Math.sin(angle);
-
              const panel = document.createElement('div');
              panel.className = 'cosmic-panel';
              panel.style.transform = `translate(${x}px, ${y}px) rotate(${angle + Math.PI / 2}rad) scale(0.1)`;
              panel.style.opacity = '0';
              container.appendChild(panel);
-
              setTimeout(() => {
                  panel.style.opacity = '0.8';
                  panel.style.transform = `translate(${x}px, ${y}px) rotate(${angle + Math.PI / 2}rad) scale(1)`;
              }, 50);
          }
-
         function completeDysonSwarmVisual(targetContainer = document.getElementById('buildContainer')) {
             if (!targetContainer) return;
             clearCosmicVisuals(targetContainer.id);
@@ -1156,34 +1140,15 @@
             const numPanels = Math.min(MAX_PANELS, Math.ceil(totalAllocations / 2));
             addMorePanels(targetContainer, numPanels);
         }
-
         // --- Confetti Functions ---
         let confettiInterval = null;
-        function startConfetti() {
-            stopConfetti();
-            createConfettiPiece();
-            confettiInterval = setInterval(createConfettiPiece, 100);
-            setTimeout(stopConfetti, 5000);
-        }
-        function stopConfetti() {
-            clearInterval(confettiInterval);
-            confettiInterval = null;
-            setTimeout(() => { confettiContainer.innerHTML = ''; }, 3000);
-        }
-        function createConfettiPiece() {
-             if (!confettiContainer) return;
-             const confetti = document.createElement('div');
-             const randomClass = `c${Math.floor(Math.random() * 5)}`;
-             confetti.className = `confetti ${randomClass}`;
-             confetti.style.left = `${Math.random() * 100}vw`;
-             confetti.style.animationDelay = `${Math.random() * 2}s`;
-             confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
-             confettiContainer.appendChild(confetti);
-             setTimeout(() => { confetti.remove(); }, 5000);
-        }
+        function startConfetti() { stopConfetti(); createConfettiPiece(); confettiInterval = setInterval(createConfettiPiece, 100); setTimeout(stopConfetti, 5000); }
+        function stopConfetti() { clearInterval(confettiInterval); confettiInterval = null; setTimeout(() => { confettiContainer.innerHTML = ''; }, 3000); }
+        function createConfettiPiece() { if (!confettiContainer) return; const confetti = document.createElement('div'); const randomClass = `c${Math.floor(Math.random() * 5)}`; confetti.className = `confetti ${randomClass}`; confetti.style.left = `${Math.random() * 100}vw`; confetti.style.animationDelay = `${Math.random() * 2}s`; confetti.style.transform = `rotate(${Math.random() * 360}deg)`; confettiContainer.appendChild(confetti); setTimeout(() => { confetti.remove(); }, 5000); }
 
     </script>
 </body>
 </html>
+
 
 
