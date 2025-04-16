@@ -818,7 +818,7 @@
         // !!! मेक श्योर यू पेस्ट यौर यूआरएल अबोव !!! (Ensuring you paste your URL above!)
 
         const MAX_PANELS = 12; // Max panels for visualization
-        const DYSON_FUN_FACTS = [
+        const DYSON_FUN_FACTS = [ // Static data for the fun facts section
             "A Dyson Sphere aims to capture nearly 100% of a star's energy output.",
             "The most likely design isn't a solid shell, but a 'Dyson Swarm' of many orbiting collectors.",
             "Building a Dyson Swarm around our Sun might require dismantling planets like Jupiter for materials!",
@@ -830,35 +830,37 @@
             "The collectors in a swarm would need advanced AI and propulsion to avoid colliding.",
             "Freeman Dyson proposed the idea in a 1960 science paper, inspired by sci-fi!"
         ];
-        const STARTER_ENTRIES = [ // Default entries if no data loaded yet
+        const STARTER_ENTRIES = [ // Default entries shown initially or if backend fails
             { text: "Our sun makes enough energy in 1 second for humanity's needs for 500,000 years!", name: "Claude", isFact: true, type: 'fact' },
             { text: "Could Dyson Spheres create artificial habitats inside?", name: "Science Friend", isFact: false, type: 'thought' },
             { text: "What if we connected Dyson Spheres around multiple stars?", name: "Cosmic Explorer", isFact: false, type: 'thought' }
         ];
 
         // --- State Variables ---
-        let score = 0;
-        let currentResources = 100;
-        let energyCollected = 0;
-        let userName = "Explorer";
-        let thoughtDataForSubmission = null; // Holds thought data for the final submission
-        let buildAllocations = { phase1: 0, phase2: 0, phase3: 0, phase4: 0 };
-        let sectionState = {
+        // These variables track the user's progress and choices
+        let score = 0; // User's fun points
+        let currentResources = 100; // Points for the build section
+        let energyCollected = 0; // Efficiency from the build section
+        let userName = "Explorer"; // Default user name
+        let thoughtDataForSubmission = null; // Temporarily holds the thought data before final submission
+        let buildAllocations = { phase1: 0, phase2: 0, phase3: 0, phase4: 0 }; // Tracks build choices
+        let sectionState = { // Tracks quiz answers and submission status
             'concept': { answered: false },
             'feasibility': { answered: false },
             'importance': { answered: false },
-            'thoughtSubmittedThisSession': false, // Track if thought was submitted in this session
+            'thoughtSubmittedThisSession': false,
             'wishSubmitted': false
         };
         let collectedEntries = []; // Stores entries currently displayed (can include starters)
 
-        // --- DOM Elements (cache them) ---
+        // --- DOM Elements (cache them for quicker access) ---
+        // Get references to various parts of the HTML page to interact with them
         const scoreDisplay = document.getElementById('score');
         const progressBar = document.getElementById('progressBar');
-        const factWall = document.getElementById('fact-wall');
-        const collectedQuestionsList = document.getElementById('collected-questions-list');
-        const collectedWishesList = document.getElementById('collected-wishes-list');
-        const funFactsList = document.getElementById('fun-facts-list');
+        const factWall = document.getElementById('fact-wall'); // Final wall
+        const collectedQuestionsList = document.getElementById('collected-questions-list'); // Questions wall
+        const collectedWishesList = document.getElementById('collected-wishes-list'); // Wishes wall
+        const funFactsList = document.getElementById('fun-facts-list'); // Static facts list
         const nameInput = document.getElementById('name-input');
         const birthdayWishInput = document.getElementById('birthday-wish');
         const sharedThoughtInput = document.getElementById('shared-thought');
@@ -866,300 +868,368 @@
         const displayName = document.getElementById('display-name');
         const finalScoreDisplay = document.getElementById('final-score');
         const finalEnergyDisplay = document.getElementById('final-energy');
-        const resourcesBuildDisplay = document.getElementById('resources-build-display');
-        const resourcesBuild = document.getElementById('resources-build');
-        const energyCollectedDisplay = document.getElementById('energy-collected');
-        const buildFeedback = document.getElementById('build-feedback');
-        const confettiContainer = document.getElementById('confettiContainer');
+        const resourcesBuildDisplay = document.getElementById('resources-build-display'); // Build points label
+        const resourcesBuild = document.getElementById('resources-build'); // Build points counter
+        const energyCollectedDisplay = document.getElementById('energy-collected'); // Build efficiency display
+        const buildFeedback = document.getElementById('build-feedback'); // Build section messages
+        const confettiContainer = document.getElementById('confettiContainer'); // For celebration animation
         const submitThoughtButton = document.getElementById('submit-thought-button');
         const submitWishButton = document.getElementById('submit-wish-button');
-        const saveFeedback = document.getElementById('save-feedback');
+        const saveFeedback = document.getElementById('save-feedback'); // Message area on final page
 
-        // --- Initial Setup (Replaced) ---
-        // This function now runs when the page loads
+        // --- Initial Setup ---
+        // This function runs automatically when the webpage finishes loading
         window.onload = function() {
             collectedEntries = []; // Start with an empty list for dynamic loading
-             // Or keep starter entries if you want them displayed initially
+             // Add starter entries so the page isn't blank initially
             STARTER_ENTRIES.forEach(entry => { collectedEntries.push(entry); });
 
-            populateFunFacts(); // Static fun facts are okay
-            // Don't populate walls on load, do it when section is shown
-            updateScoreDisplay();
-            updateBuildResourcesDisplay();
-            updateEnergyCollectedDisplay();
-            showSection('intro');
+            populateFunFacts(); // Display the built-in fun facts
+            // Don't populate dynamic walls on load, wait until sections are shown
+            updateScoreDisplay(); // Set initial score display
+            updateBuildResourcesDisplay(); // Set initial build points display
+            updateEnergyCollectedDisplay(); // Set initial build efficiency display
+            showSection('intro'); // Show the first section ('intro')
         };
 
         // --- Core Functions ---
 
-        // Populates the static fun facts list
+        /**
+         * Populates the fun facts list in the 'fun-facts' section with predefined facts.
+         */
         function populateFunFacts() {
-            funFactsList.innerHTML = ''; // Clear existing
-            DYSON_FUN_FACTS.forEach(fact => {
-                const li = document.createElement('li');
-                li.textContent = fact;
-                funFactsList.appendChild(li);
+            funFactsList.innerHTML = ''; // Clear any previous list items
+            DYSON_FUN_FACTS.forEach(fact => { // Loop through each fact
+                const li = document.createElement('li'); // Create a new list item element
+                li.textContent = fact; // Set its text content
+                funFactsList.appendChild(li); // Add it to the list on the page
             });
         }
 
-        // Adds a single entry (fact, thought, wish) to a list visually
+        /**
+         * Adds a single entry (fact, thought, wish) to a specified list element on the page.
+         * @param {HTMLElement} listElement - The UL element to add the entry to (e.g., factWall, collectedQuestionsList).
+         * @param {object} entry - The entry object { text, name, isFact, type }.
+         */
         function addEntryToWall(listElement, entry) {
-            if (!listElement) return; // Safety check
-            const li = document.createElement('li');
-            const textNode = document.createTextNode(entry.text || ''); // Ensure text exists
-            const attributionSpan = document.createElement('span');
-            attributionSpan.className = 'fact-attribution';
-            attributionSpan.textContent = `- ${entry.name || 'Anonymous'} (${getEntryTypeLabel(entry)})`;
+            if (!listElement) return; // Safety check if the list doesn't exist
+            const li = document.createElement('li'); // Create list item
+            const textNode = document.createTextNode(entry.text || ''); // Create text for the entry
+            const attributionSpan = document.createElement('span'); // Create span for the "- Name (Type)" part
+            attributionSpan.className = 'fact-attribution'; // Add CSS class for styling
+            attributionSpan.textContent = `- ${entry.name || 'Anonymous'} (${getEntryTypeLabel(entry)})`; // Set attribution text
 
-            li.appendChild(textNode);
-            li.appendChild(document.createTextNode(' '));
-            li.appendChild(attributionSpan);
+            li.appendChild(textNode); // Add the main text
+            li.appendChild(document.createTextNode(' ')); // Add a space
+            li.appendChild(attributionSpan); // Add the attribution
 
+            // Add specific CSS classes for different styling based on type
             if (entry.type === 'wish') { li.classList.add('wish'); }
-            else if (!entry.isFact) { li.classList.add('not-fact'); }
+            else if (entry.type === 'thought' && !entry.isFact) { li.classList.add('not-fact'); } // Style thoughts/ideas differently
 
-            // Add to the top of the list (newest first)
+            // Add the new item to the *top* of the list (newest first)
             listElement.insertBefore(li, listElement.firstChild);
         }
 
-        // Gets a display label for the entry type
+        /**
+         * Gets a user-friendly label for the type of entry.
+         * @param {object} entry - The entry object.
+         * @returns {string} The label ('Wish', 'Fact', 'Thought/Idea').
+         */
         function getEntryTypeLabel(entry) {
             if (entry.type === 'wish') return 'Wish';
+            // Check if it's a thought type before checking isFact
             if (entry.type === 'thought') return entry.isFact ? 'Fact' : 'Thought/Idea';
+            if (entry.type === 'fact') return 'Fact'; // Handle starter facts
             return 'Contribution'; // Default fallback
         }
 
-        // Shows a specific section and handles dynamic data loading (Replaced)
+        /**
+         * Shows a specific game section and hides others. Handles dynamic data loading.
+         * @param {string} sectionId - The ID of the section div to show.
+         */
         function showSection(sectionId) {
-            // Hide all sections
+            // Hide all sections first
             document.querySelectorAll('.game-section').forEach(section => { section.classList.remove('active'); });
-            // Show the target section
+            // Find the section to show
             const element = document.getElementById(sectionId);
-            if (element) { element.classList.add('active'); }
-            else { console.error("Section not found:", sectionId); return; }
+            if (element) {
+                element.classList.add('active'); // Show it with animation
+            } else {
+                console.error("Section not found:", sectionId); return; // Log error if ID is wrong
+            }
 
-            // Clear build feedback if needed
+            // Reset build feedback message when entering/leaving build section
             if (buildFeedback) {
                 buildFeedback.innerHTML = '<p>Awaiting your command, Commander!</p>';
                 buildFeedback.className = 'build-feedback';
             }
 
-            // Update progress bar
+            // Update the progress bar at the top
             const sections = ['intro', 'fun-facts', 'concept', 'feasibility', 'importance', 'build', 'share-thoughts', 'collected-questions', 'collected-wishes', 'conclusion'];
             const currentIndex = sections.indexOf(sectionId);
             const progressPercent = (currentIndex / (sections.length - 1)) * 100;
             progressBar.style.width = progressPercent + '%';
 
-            // Update visuals
+            // Update the cosmic sphere visual if the section has one
             updateCosmicVisuals(sectionId);
 
-            // --- Load data when needed ---
-            // Uses the new fetchDataFromBackend function
+            // --- Load data dynamically when specific sections are shown ---
+            // This uses the fetchDataFromBackend function to get fresh data
             if (sectionId === 'collected-questions') { populateCollectedQuestions(); }
             if (sectionId === 'collected-wishes') { populateCollectedWishes(); }
             if (sectionId === 'conclusion') {
-                 finalizeResults(); // This might call populateFactWall
+                 finalizeResults(); // This calls populateFactWall to load the final combined list
+                 // Reset save feedback message from previous attempts
                  saveFeedback.style.display = 'none'; saveFeedback.textContent = ''; saveFeedback.className = 'feedback';
             }
-            if (sectionId === 'build') { // Ensure build section updates correctly
+            // Ensure build section UI elements are updated when shown
+            if (sectionId === 'build') {
                 updateBuildResourcesDisplay(); updateBuildButtons(); updateEnergyCollectedDisplay();
             }
         }
 
-        // Updates the score display
+        /**
+         * Updates the score display on the page with a small animation.
+         */
         function updateScoreDisplay() {
-            scoreDisplay.textContent = score;
-            scoreDisplay.classList.add('resource-animation');
+            scoreDisplay.textContent = score; // Update the number
+            scoreDisplay.classList.add('resource-animation'); // Add animation class
+            // Remove animation class after a short delay
             setTimeout(() => scoreDisplay.classList.remove('resource-animation'), 500);
         }
 
 
-        // --- Build Section Specific Functions (Unchanged) ---
+        // --- Build Section Specific Functions ---
+        // These handle the logic for the "Build Your Own" section
+
+        /** Updates the display for remaining Design Points. */
         function updateBuildResourcesDisplay() {
             const pointsText = currentResources;
-            if(resourcesBuildDisplay) resourcesBuildDisplay.textContent = pointsText;
-            if(resourcesBuild) resourcesBuild.textContent = pointsText;
-            if(resourcesBuild) {
+            if(resourcesBuildDisplay) resourcesBuildDisplay.textContent = pointsText; // Update label
+            if(resourcesBuild) resourcesBuild.textContent = pointsText; // Update counter
+            if(resourcesBuild) { // Animate the counter
                 resourcesBuild.classList.add('resource-animation');
                 setTimeout(() => resourcesBuild.classList.remove('resource-animation'), 500);
             }
         }
+        /** Calculates and updates the Blueprint Efficiency display. */
         function updateEnergyCollectedDisplay() {
-             let calculatedEnergy = Math.min(100,
+             let calculatedEnergy = Math.min(100, // Cap at 100%
                 (buildAllocations.phase1 * 10) + (buildAllocations.phase2 * 25) +
                 (buildAllocations.phase3 * 8) + (buildAllocations.phase4 * 5)
              );
             energyCollected = Math.round(calculatedEnergy);
-            if(energyCollectedDisplay) energyCollectedDisplay.textContent = energyCollected;
+            if(energyCollectedDisplay) energyCollectedDisplay.textContent = energyCollected; // Update display
         }
+        /** Executes a build phase: deducts points, updates state, gives feedback. */
         function runMissionPhase(phase, cost) {
-             if (currentResources >= cost) {
-                 currentResources -= cost;
-                 buildAllocations[phase] = (buildAllocations[phase] || 0) + 1;
+             if (currentResources >= cost) { // Check if enough points
+                 currentResources -= cost; // Deduct points
+                 buildAllocations[phase] = (buildAllocations[phase] || 0) + 1; // Track phase completion
+                 // Update displays
                  updateBuildResourcesDisplay(); updateEnergyCollectedDisplay(); updateBuildButtons();
 
                  let feedbackMsg = ""; let panelsToAdd = 0; let pointsEarned = 0;
-                 buildFeedback.className = 'build-feedback success';
+                 buildFeedback.className = 'build-feedback success'; // Set feedback style
 
+                 // Determine feedback, visuals, and points based on the phase chosen
                  switch (phase) {
                      case 'phase1': feedbackMsg = `<strong>Phase 1 Complete!</strong> Basic collector swarm deployed. <span class="sparkle">☀️</span>`; panelsToAdd = 1; pointsEarned = 5; break;
                      case 'phase2': feedbackMsg = `<strong>Phase 2 Complete!</strong> Power converters online. <span class="sparkle">⚡</span>`; panelsToAdd = 2; pointsEarned = 8; break;
                      case 'phase3': feedbackMsg = `<strong>Phase 3 Complete!</strong> Relay stations active. <span class="sparkle">📡</span>`; panelsToAdd = 1; pointsEarned = 4; break;
                      case 'phase4': feedbackMsg = `<strong>Phase 4 Complete!</strong> Orbit stabilizers engaged. <span class="sparkle">🛡️</span>`; panelsToAdd = 1; pointsEarned = 6; break;
                  }
-                 buildFeedback.innerHTML = `<p>${feedbackMsg}</p>`;
-                 addPanelToVisual(panelsToAdd);
-                 score += pointsEarned;
-                 updateScoreDisplay();
-             } else {
+                 buildFeedback.innerHTML = `<p>${feedbackMsg}</p>`; // Show feedback message
+                 addPanelToVisual(panelsToAdd); // Add visual panels to the sphere
+                 score += pointsEarned; // Add fun points
+                 updateScoreDisplay(); // Update score display
+
+             } else { // Not enough points
                  buildFeedback.innerHTML = "<p>Mission Control reports insufficient Design Points!</p>";
-                 buildFeedback.className = 'build-feedback info';
+                 buildFeedback.className = 'build-feedback info'; // Use different style for info message
              }
         }
+        /** Enables/disables build phase buttons based on available points. */
         function updateBuildButtons() {
             document.querySelectorAll('.build-choices .build-btn').forEach(button => {
-                const onclickAttr = button.getAttribute('onclick');
+                const onclickAttr = button.getAttribute('onclick'); // Get the button's action
+                // Extract the cost from the onclick attribute text
                 const match = onclickAttr?.match(/runMissionPhase\('[^']+',\s*(\d+)\)/);
-                if (match && match[1]) { const cost = parseInt(match[1]); button.disabled = currentResources < cost; }
-                else { button.disabled = false; console.warn("Could not determine cost for button:", button.id); }
+                if (match && match[1]) { // If cost found
+                    const cost = parseInt(match[1]);
+                    button.disabled = currentResources < cost; // Disable if not enough points
+                } else { // Fallback if cost can't be determined
+                    button.disabled = false;
+                    console.warn("Could not determine cost for button:", button.id);
+                }
             });
         }
+        /** Adds panel elements to the 'build' section's visual sphere. */
         function addPanelToVisual(count = 1) {
             const container = document.getElementById('buildContainer'); if (!container) return;
-            const panelCount = container.querySelectorAll('.cosmic-panel').length; if (panelCount >= MAX_PANELS) return;
-            const panelsToAdd = Math.min(count, MAX_PANELS - panelCount);
-            addMorePanels(container, panelsToAdd); // Use the generalized function
+            const panelCount = container.querySelectorAll('.cosmic-panel').length; if (panelCount >= MAX_PANELS) return; // Limit panels
+            const panelsToAdd = Math.min(count, MAX_PANELS - panelCount); // Calculate how many can be added
+            addMorePanels(container, panelsToAdd); // Call the function to actually add them
         }
         // --- End of Build Section Functions ---
 
 
         // --- Quiz and Submission Functions ---
 
-        // Handles multiple choice selection (Unchanged)
+        /**
+         * Handles the selection of an option in a multiple-choice question.
+         * @param {HTMLElement} element - The clicked option div.
+         * @param {string} questionId - The ID of the question (e.g., 'concept').
+         * @param {boolean} isCorrect - Whether the selected option is the correct answer.
+         */
         function selectOption(element, questionId, isCorrect) {
-            if (sectionState[questionId].answered) return;
-            sectionState[questionId].answered = true;
+            if (sectionState[questionId].answered) return; // Prevent answering twice
+            sectionState[questionId].answered = true; // Mark as answered
 
             const feedbackElement = document.getElementById(`${questionId}-feedback`);
             const optionsContainer = document.getElementById(`${questionId}-options`);
             const nextButton = document.getElementById(`${questionId}-next`);
 
+            // Disable all options for this question
             optionsContainer.querySelectorAll('.option').forEach(opt => {
-                opt.onclick = null; opt.classList.add('disabled');
-                if (opt !== element) opt.style.opacity = '0.6';
+                opt.onclick = null; // Remove click ability
+                opt.classList.add('disabled'); // Add disabled style
+                if (opt !== element) opt.style.opacity = '0.6'; // Dim unselected options
             });
-            element.classList.add('selected');
+            element.classList.add('selected'); // Style the selected option
 
+            // Provide feedback and update score
             if (isCorrect) {
-                score += 10; element.classList.add('correct');
+                score += 10; element.classList.add('correct'); // Add points and correct style
                 feedbackElement.innerHTML = `<p><strong>Correct!</strong> ${getFeedbackText(questionId, true)}</p>`;
-                feedbackElement.className = 'feedback correct';
+                feedbackElement.className = 'feedback correct'; // Show correct feedback box
             } else {
-                score += 2; element.classList.add('incorrect');
+                score += 2; element.classList.add('incorrect'); // Add fewer points and incorrect style
                 feedbackElement.innerHTML = `<p><strong>Not quite!</strong> ${getFeedbackText(questionId, false)}</p>`;
-                feedbackElement.className = 'feedback incorrect';
+                feedbackElement.className = 'feedback incorrect'; // Show incorrect feedback box
+                // Highlight the actual correct answer
                 optionsContainer.querySelectorAll('.option').forEach(opt => {
-                    const onclickAttrValue = opt.getAttribute('onclick');
-                    if (onclickAttrValue && onclickAttrValue.includes(', true)')) {
-                        opt.classList.add('correct'); opt.style.opacity = '1';
+                    const onclickAttrValue = opt.getAttribute('onclick'); // Check original onclick
+                    if (onclickAttrValue && onclickAttrValue.includes(', true)')) { // Find the one marked as correct
+                        opt.classList.add('correct'); opt.style.opacity = '1'; // Style it as correct
                     }
                 });
             }
-            updateScoreDisplay();
-            nextButton.style.display = 'inline-block';
+            updateScoreDisplay(); // Update score display
+            nextButton.style.display = 'inline-block'; // Show the 'Next' button
         }
 
-        // Gets feedback text for quiz questions (Unchanged)
+        /**
+         * Returns specific feedback text for each quiz question.
+         * @param {string} questionId - The ID of the question.
+         * @param {boolean} isCorrect - Whether the user's answer was correct.
+         * @returns {string} Feedback text.
+         */
         function getFeedbackText(questionId, isCorrect) {
+            // Provides explanatory text for quiz answers
             switch (questionId) {
                 case 'concept': return isCorrect ? "Dyson proposed a 'swarm' of collectors. A solid shell is likely unstable!" : "While sci-fi loves solid shells, Dyson proposed a 'swarm' of many collectors. A solid shell would face huge gravitational stress!";
                 case 'feasibility': return isCorrect ? "Exactly! The sheer amount of material needed is staggering - maybe needing entire planets!" : "While other factors are tricky, getting enough *stuff* (materials) is the biggest hurdle. We might need to dismantle planets!";
                 case 'importance': return isCorrect ? "Right! It represents the ultimate energy goal for advanced civilizations and could be a sign of alien life (technosignature)." : "The main idea is capturing nearly ALL a star's energy. It's also a potential 'technosignature' – a sign of advanced alien tech.";
-                default: return "";
+                default: return ""; // Default empty feedback
             }
         }
 
-        // Submits thought locally and prepares data for final submission (Replaced)
-        let thoughtDataForSubmission = null; // Variable to hold the thought data
-
+        /**
+         * Handles submission of a thought/fact/question. Stores it temporarily for final submission.
+         * (Replaced with updated logic)
+         */
         function submitThought() {
-            const thoughtText = sharedThoughtInput.value.trim();
-            const isNotFact = sharedFactCheck.checked;
+            const thoughtText = sharedThoughtInput.value.trim(); // Get text from input
+            const isNotFact = sharedFactCheck.checked; // Check the checkbox
 
-            if (thoughtText) {
-                const currentName = nameInput.value.trim() || userName; // Use name if entered, else default
-                const isFactActual = !isNotFact;
-                const newEntry = {
-                    text: thoughtText,
-                    name: currentName,
-                    isFact: isFactActual,
-                    type: 'thought'
+            if (thoughtText) { // Only proceed if text was entered
+                const currentName = nameInput.value.trim() || userName; // Get name or use default
+                const isFactActual = !isNotFact; // Determine if it's claimed as a fact
+                const newEntry = { // Create an object for potential local display
+                    text: thoughtText, name: currentName, isFact: isFactActual, type: 'thought'
                 };
 
-                // Store the data needed for the final POST request
+                // Store the data needed for the final POST request to the backend
                 thoughtDataForSubmission = {
                     thought: thoughtText,
-                    isFact: isFactActual // Make sure we remember if it was a fact
+                    isFact: isFactActual // Remember if it was marked as a fact
                 };
-                sectionState.thoughtSubmittedThisSession = true; // Mark that a thought was entered
+                sectionState.thoughtSubmittedThisSession = true; // Flag that a thought was entered
 
                 // --- Update UI ---
-                sharedThoughtInput.value = '';
-                sharedFactCheck.checked = false;
-                const originalText = submitThoughtButton.textContent;
-                submitThoughtButton.textContent = 'Added!';
-                submitThoughtButton.disabled = true;
-                setTimeout(() => {
-                    submitThoughtButton.textContent = originalText;
-                    submitThoughtButton.disabled = false;
+                sharedThoughtInput.value = ''; // Clear the input box
+                sharedFactCheck.checked = false; // Uncheck the box
+                const originalText = submitThoughtButton.textContent; // Store original button text
+                submitThoughtButton.textContent = 'Added!'; // Change button text temporarily
+                submitThoughtButton.disabled = true; // Disable button temporarily
+                setTimeout(() => { // After 1.5 seconds...
+                    submitThoughtButton.textContent = originalText; // Restore button text
+                    submitThoughtButton.disabled = false; // Re-enable button
                 }, 1500);
 
-                score += 5;
-                updateScoreDisplay();
+                score += 5; // Award points for contributing
+                updateScoreDisplay(); // Update score display
 
-                // Optional: Add to local display immediately if you want
-                // This allows the user to see their own thought even before it's loaded back
-                 addEntryToWall(factWall, newEntry); // Add to main wall preview
+                // Optional: Add to local display immediately so user sees their contribution
+                // This doesn't wait for backend confirmation but gives instant feedback
+                 addEntryToWall(factWall, newEntry); // Add to main wall preview on conclusion page
                  if (document.getElementById('collected-questions').classList.contains('active')) {
-                      addEntryToWall(collectedQuestionsList, newEntry); // Add to questions wall if visible
+                      addEntryToWall(collectedQuestionsList, newEntry); // Add to questions wall if currently visible
                  }
 
             } else {
-                alert("Please share a thought or fact first!");
+                alert("Please share a thought or fact first!"); // Prompt if input is empty
             }
         }
 
 
-        // NEW function to fetch data from backend
-        // Asks the Google Apps Script for lists of thoughts or wishes
+        /**
+         * NEW function to fetch data (thoughts or wishes) from the Google Apps Script backend.
+         * @param {string} [type='thoughts'] - The type of data to fetch ('thoughts' or 'wishes').
+         * @param {number} [limit=20] - The maximum number of items to fetch.
+         * @returns {Promise<Array>} A promise that resolves to an array of fetched entries.
+         */
         async function fetchDataFromBackend(type = 'thoughts', limit = 20) {
             // Safety check: Ensure the URL is not the placeholder
             if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL === 'YOUR_NEW_DEPLOYMENT_URL_HERE') {
-                console.error("Google Apps Script URL is not set!");
-                alert("Error: Backend connection not configured.");
+                console.error("Google Apps Script URL is not set! Cannot fetch data.");
+                // Don't alert here, just return empty to avoid spamming user
                 return []; // Return empty array if URL is not set
             }
             try {
-                // Ask the helper script for data (using the GET part)
-                const response = await fetch(`${GOOGLE_SCRIPT_URL}?type=${type}&limit=${limit}`);
+                // Construct the URL with query parameters for type and limit
+                const fetchUrl = `${GOOGLE_SCRIPT_URL}?type=${type}&limit=${limit}`;
+                // Ask the helper script for data using a GET request
+                const response = await fetch(fetchUrl);
+                // Check if the network request itself was successful
                 if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`); }
-                const result = await response.json(); // Get the reply
+                // Parse the JSON reply from the script
+                const result = await response.json();
+                // Check the status field within the JSON reply
                 if (result.status === 'success') {
-                    return result.data; // Return the list of thoughts or wishes
+                    console.log(`Fetched ${result.data?.length || 0} ${type} from backend.`);
+                    return result.data || []; // Return the array of data, or empty array if missing
                 } else {
+                    // Log error message if the script reported a failure
                     console.error("Backend Error:", result.message); return [];
                 }
             } catch (error) {
+                // Log error if the fetch itself failed (network issue, invalid URL, etc.)
                 console.error(`Could not fetch ${type}:`, error); return [];
             }
         }
 
-        // Populates collected questions by fetching from backend (Replaced)
+        /**
+         * Populates the collected questions list by fetching data from the backend.
+         * (Replaced with async version)
+         */
         async function populateCollectedQuestions() {
             collectedQuestionsList.innerHTML = '<li>Loading questions...</li>'; // Show loading message
             const questionsAndThoughts = await fetchDataFromBackend('thoughts', 20); // Ask backend for thoughts
             collectedQuestionsList.innerHTML = ''; // Clear loading message
-            if (questionsAndThoughts.length === 0) {
+            if (questionsAndThoughts.length === 0) { // If no data returned
                  collectedQuestionsList.innerHTML = '<li>No questions or thoughts shared yet!</li>';
             } else {
                  // Display the thoughts fetched from the sheet
@@ -1167,12 +1237,15 @@
             }
         }
 
-        // Populates collected wishes by fetching from backend (Replaced)
+        /**
+         * Populates the collected wishes list by fetching data from the backend.
+         * (Replaced with async version)
+         */
         async function populateCollectedWishes() {
              collectedWishesList.innerHTML = '<li>Loading wishes...</li>'; // Show loading message
              const wishes = await fetchDataFromBackend('wishes', 30); // Ask backend for wishes
              collectedWishesList.innerHTML = ''; // Clear loading message
-              if (wishes.length === 0) {
+              if (wishes.length === 0) { // If no data returned
                  collectedWishesList.innerHTML = '<li>No birthday wishes yet!</li>';
               } else {
                  // Display wishes fetched from the sheet
@@ -1180,17 +1253,20 @@
               }
         }
 
-        // Populates the final wall by fetching all contributions (Replaced)
+        /**
+         * Populates the final wall on the conclusion page by fetching all contributions.
+         * (Replaced with async version)
+         */
         async function populateFactWall() {
             factWall.innerHTML = '<li>Loading contributions...</li>'; // Show loading message
-            const thoughts = await fetchDataFromBackend('thoughts', 25); // Get thoughts
-            const wishes = await fetchDataFromBackend('wishes', 25); // Get wishes
+            const thoughts = await fetchDataFromBackend('thoughts', 25); // Get recent thoughts
+            const wishes = await fetchDataFromBackend('wishes', 25); // Get recent wishes
 
-            // Combine fetched data
-            // Add starter entries if you want them included on the final wall too
+            // Combine fetched data with starter entries for a fuller list
             const allEntries = [...STARTER_ENTRIES, ...thoughts, ...wishes];
 
             // Optional: Remove duplicates if starter entries might get re-submitted
+            // This creates a new list containing only unique entries based on text, name, and type
             const uniqueEntries = allEntries.filter((entry, index, self) =>
                  index === self.findIndex((e) => (
                      e.text === entry.text && e.name === entry.name && e.type === entry.type
@@ -1200,151 +1276,193 @@
              // uniqueEntries.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
             factWall.innerHTML = ''; // Clear loading message
-             if (uniqueEntries.length === 0) {
+             if (uniqueEntries.length === 0) { // If still empty after combining
                 factWall.innerHTML = '<li>No contributions submitted yet!</li>';
              } else {
-                 // Display all fetched entries
+                 // Display all unique fetched entries
                 uniqueEntries.forEach(entry => addEntryToWall(factWall, entry));
              }
         }
 
-        // Submits final results and wish to the backend (Replaced)
+        /**
+         * Submits the final results (score, name, wish, thought) to the Google Apps Script backend.
+         * (Replaced with updated version using fetch and response handling)
+         */
         async function submitBirthdayWish() {
-            // --- Safety check for URL ---
+            // --- Safety check: Ensure the backend URL is configured ---
             if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL === 'YOUR_NEW_DEPLOYMENT_URL_HERE') {
                  console.error("Google Apps Script URL is not set!");
                  alert("Error: Cannot save results, backend connection not configured.");
                  saveFeedback.textContent = 'Error: Backend connection not configured.';
                  saveFeedback.className = 'feedback save-error';
                  saveFeedback.style.display = 'block';
-                 return;
+                 return; // Stop execution if URL is missing
              }
 
-            // --- Existing checks ---
+            // --- Prevent double submission ---
             if (sectionState.wishSubmitted) { alert("You've already submitted your wish and results!"); return; }
+
+            // --- Get user inputs ---
             const wishText = birthdayWishInput.value.trim();
             const finalName = nameInput.value.trim();
+
+            // --- Validate inputs ---
             if (!finalName) { alert("Please enter your name to sign your wish and save results!"); nameInput.focus(); return; }
-            userName = finalName; displayName.textContent = userName;
+            userName = finalName; displayName.textContent = userName; // Update name globally and on page
             if (!wishText) { alert("Please write a birthday wish for Mary!"); birthdayWishInput.focus(); return; }
 
-            // --- Prepare Data to Send ---
+            // --- Prepare Data to Send to the backend ---
             const dataToSend = {
                 name: userName,
                 score: score,
                 efficiency: energyCollected,
+                // Include thought details only if one was submitted in this session
                 thought: sectionState.thoughtSubmittedThisSession ? thoughtDataForSubmission?.thought : null,
-                isFact: sectionState.thoughtSubmittedThisSession ? thoughtDataForSubmission?.isFact : null, // Send isFact status too
+                isFact: sectionState.thoughtSubmittedThisSession ? thoughtDataForSubmission?.isFact : null,
                 wish: wishText,
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString() // Add current time
             };
 
-            // --- Update UI - Show "Saving..." ---
-            submitWishButton.disabled = true;
+            // --- Update UI to show "Saving..." ---
+            submitWishButton.disabled = true; // Disable button during save
             submitWishButton.textContent = 'Saving...';
             saveFeedback.textContent = 'Saving your results...';
-            saveFeedback.className = 'feedback saving';
-            saveFeedback.style.display = 'block';
+            saveFeedback.className = 'feedback saving'; // Apply 'saving' style
+            saveFeedback.style.display = 'block'; // Make feedback visible
 
-            // --- Try Sending the Data ---
+            // --- Try Sending the Data to Google Apps Script ---
             try {
+                // Use 'fetch' to send data via POST
                 const response = await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
-                    cache: 'no-cache',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // Send as plain text
-                    body: JSON.stringify(dataToSend) // Turn the data into a string
+                    cache: 'no-cache', // Don't use cached versions
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // Send data as plain text
+                    body: JSON.stringify(dataToSend) // Convert the data object to a JSON string
                 });
 
-                const result = await response.json(); // Get the reply from the helper script
+                // Wait for the reply from the script and parse it as JSON
+                const result = await response.json();
 
-                if (result.status === "success") { // Hooray! The script said it worked!
+                // Check the 'status' field in the reply from the script
+                if (result.status === "success") { // Hooray! The script confirmed success!
                     saveFeedback.textContent = 'Results saved successfully! Thank you!';
-                    saveFeedback.className = 'feedback save-success';
-                    sectionState.wishSubmitted = true;
-                    thoughtDataForSubmission = null; // Clear temporary data
-                    sectionState.thoughtSubmittedThisSession = false;
-                    submitWishButton.textContent = "Results Saved!";
-                    score += 10;
-                    updateScoreDisplay();
-                    startConfetti();
-                    // Optionally add the wish to the local wall immediately after successful save
+                    saveFeedback.className = 'feedback save-success'; // Apply 'success' style
+                    sectionState.wishSubmitted = true; // Mark as submitted
+                    thoughtDataForSubmission = null; // Clear temporary thought data
+                    sectionState.thoughtSubmittedThisSession = false; // Reset flag
+                    submitWishButton.textContent = "Results Saved!"; // Keep button disabled, show confirmation
+
+                    score += 10; // Award bonus points for submitting
+                    updateScoreDisplay(); // Update score display
+                    startConfetti(); // Celebrate!
+
+                    // Optionally add the wish to the local walls immediately after successful save
+                    // This provides instant visual confirmation on the current page
                     const newWishEntry = { text: wishText, name: userName, isFact: false, type: 'wish' };
-                    addEntryToWall(factWall, newWishEntry);
+                    addEntryToWall(factWall, newWishEntry); // Add to final wall
                     if (document.getElementById('collected-wishes').classList.contains('active')) {
-                        addEntryToWall(collectedWishesList, newWishEntry);
+                        addEntryToWall(collectedWishesList, newWishEntry); // Add to wishes wall if visible
                     }
-                } else { // Uh oh, the script reported an error
-                    throw new Error(result.message || "Unknown error from backend.");
+                } else { // Uh oh, the script reported an error in its reply
+                    throw new Error(result.message || "Unknown error reported by backend.");
                 }
 
-            } catch (error) { // Problem contacting the script or getting reply
-                console.error('Error sending data:', error);
+            } catch (error) { // Catch errors during fetch or if the script reply wasn't successful JSON
+                console.error('Error sending data or processing response:', error);
                 saveFeedback.textContent = `Error saving results: ${error.message}. Your wish might not be saved online.`;
-                saveFeedback.className = 'feedback save-error';
-                submitWishButton.textContent = "Save Failed (Retry?)";
-                submitWishButton.disabled = false; // Allow retry
+                saveFeedback.className = 'feedback save-error'; // Apply 'error' style
+                submitWishButton.textContent = "Save Failed (Retry?)"; // Change button text
+                submitWishButton.disabled = false; // Re-enable button to allow retry
             }
         }
 
-        // Updates final display, now calls async populateFactWall (Replaced)
-        async function finalizeResults() { // Make it async to wait for data
-            finalScoreDisplay.textContent = score;
-            finalEnergyDisplay.textContent = energyCollected;
-            displayName.textContent = nameInput.value.trim() || userName;
-            await populateFactWall(); // Load the latest data for the final wall
+        /**
+         * Updates the final score/name display and populates the main contribution wall.
+         * (Replaced with async version to wait for populateFactWall)
+         */
+        async function finalizeResults() { // Make it async because it calls an async function
+            finalScoreDisplay.textContent = score; // Update final score display
+            finalEnergyDisplay.textContent = energyCollected; // Update final efficiency display
+            displayName.textContent = nameInput.value.trim() || userName; // Update displayed name
+            await populateFactWall(); // Wait for the final contribution wall to load data from backend
         }
 
 
         // --- Visual Effect Functions (Mostly Unchanged) ---
+        // These handle the animations and dynamic visuals like the cosmic sphere and confetti
+
+        /** Updates the cosmic sphere visualization based on the current section. */
         function updateCosmicVisuals(sectionId) {
+             // Clear visuals from other sections first
              ['conceptContainer', 'feasibilityContainer', 'importanceContainer', 'buildContainer'].forEach(id => {
                  if (id !== `${sectionId}Container`) { clearCosmicVisuals(id); }
              });
              const container = document.getElementById(`${sectionId}Container`); if (!container) return;
+             // Ensure the star is always present
              if (!container.querySelector('.star')) { const star = document.createElement('div'); star.className = 'star'; container.appendChild(star); }
+             // Add elements based on the current section
              switch (sectionId) {
-                 case 'concept': break;
-                 case 'feasibility': addCosmicRing(container); break;
-                 case 'importance': addCosmicRing(container); addMorePanels(container, 5); break;
-                 case 'build': completeDysonSwarmVisual(container); break;
+                 case 'concept': break; // Just the star
+                 case 'feasibility': addCosmicRing(container); break; // Star + Ring
+                 case 'importance': addCosmicRing(container); addMorePanels(container, 5); break; // Star + Ring + Some Panels
+                 case 'build': completeDysonSwarmVisual(container); break; // Star + Ring + Panels based on build choices
              }
         }
+        /** Removes rings and panels from a specified visual container. */
         function clearCosmicVisuals(containerId) {
              const container = document.getElementById(containerId);
              if (container) { const elementsToRemove = container.querySelectorAll('.cosmic-ring, .cosmic-panel'); elementsToRemove.forEach(el => el.remove()); }
         }
+        /** Adds the rotating cosmic ring visual to a container. */
         function addCosmicRing(targetContainer) {
-             if (!targetContainer || targetContainer.querySelector('.cosmic-ring')) return;
+             if (!targetContainer || targetContainer.querySelector('.cosmic-ring')) return; // Don't add if exists
              const ring = document.createElement('div'); ring.className = 'cosmic-ring'; targetContainer.appendChild(ring);
-             void ring.offsetWidth; ring.style.opacity = '1';
+             void ring.offsetWidth; // Trigger reflow for animation
+             ring.style.opacity = '1'; // Make it visible
         }
+        /** Adds a specified number of orbiting panel visuals to a container. */
         function addMorePanels(targetContainer, count) {
              if (!targetContainer) return;
-             if (!targetContainer.querySelector('.cosmic-ring')) { addCosmicRing(targetContainer); }
-             const radius = 75; const existingPanels = targetContainer.querySelectorAll('.cosmic-panel').length;
-             for (let i = 0; i < count; i++) {
-                 if (existingPanels + i >= MAX_PANELS) break;
+             if (!targetContainer.querySelector('.cosmic-ring')) { addCosmicRing(targetContainer); } // Ensure ring exists
+             const radius = 75; // Orbit radius
+             const existingPanels = targetContainer.querySelectorAll('.cosmic-panel').length; // Count existing panels
+             for (let i = 0; i < count; i++) { // Loop to add 'count' panels
+                 if (existingPanels + i >= MAX_PANELS) break; // Stop if max panels reached
                  const panelIndex = existingPanels + i;
-                 const angle = (panelIndex / Math.max(1, MAX_PANELS)) * 2 * Math.PI + (Math.random() * 0.3 - 0.15);
+                 // Calculate position around the ring
+                 const angle = (panelIndex / Math.max(1, MAX_PANELS)) * 2 * Math.PI + (Math.random() * 0.3 - 0.15); // Distribute evenly + randomness
                  const x = radius * Math.cos(angle); const y = radius * Math.sin(angle);
+                 // Create panel element
                  const panel = document.createElement('div'); panel.className = 'cosmic-panel';
+                 // Position and rotate panel, start scaled down and invisible
                  panel.style.transform = `translate(${x}px, ${y}px) rotate(${angle + Math.PI / 2}rad) scale(0.1)`; panel.style.opacity = '0';
-                 targetContainer.appendChild(panel);
+                 targetContainer.appendChild(panel); // Add to page
+                 // Animate appearance with a slight delay for each panel
                  setTimeout(() => { panel.style.opacity = '0.7'; panel.style.transform = `translate(${x}px, ${y}px) rotate(${angle + Math.PI / 2}rad) scale(1)`; }, 50 * i);
              }
         }
+        /** Draws the complete Dyson Swarm visual based on completed build phases. */
         function completeDysonSwarmVisual(targetContainer) {
              if (!targetContainer) return;
-             clearCosmicVisuals(targetContainer.id); addCosmicRing(targetContainer);
-             const numPanels = Math.min(MAX_PANELS, (buildAllocations.phase1 * 2) + (buildAllocations.phase2 * 3) + (buildAllocations.phase3 * 1) + (buildAllocations.phase4 * 1) );
-             addMorePanels(targetContainer, numPanels);
+             clearCosmicVisuals(targetContainer.id); // Clear previous visuals
+             addCosmicRing(targetContainer); // Add the ring
+             // Calculate how many panels to show based on phases completed
+             const numPanels = Math.min(MAX_PANELS,
+                (buildAllocations.phase1 * 2) + (buildAllocations.phase2 * 3) +
+                (buildAllocations.phase3 * 1) + (buildAllocations.phase4 * 1)
+             );
+             addMorePanels(targetContainer, numPanels); // Add the calculated panels
         }
-        // --- Confetti Functions (Unchanged) ---
-        let confettiInterval = null;
+        // --- Confetti Functions ---
+        let confettiInterval = null; // Variable to control confetti generation
+        /** Starts the confetti animation for 5 seconds. */
         function startConfetti() { stopConfetti(); createConfettiPiece(); confettiInterval = setInterval(createConfettiPiece, 100); setTimeout(stopConfetti, 5000); }
+        /** Stops the confetti animation and clears pieces. */
         function stopConfetti() { clearInterval(confettiInterval); confettiInterval = null; setTimeout(() => { if (confettiContainer) confettiContainer.innerHTML = ''; }, 3000); }
-        function createConfettiPiece() { if (!confettiContainer) return; const confetti = document.createElement('div'); const randomClass = `c${Math.floor(Math.random() * 5)}`; confetti.className = `confetti ${randomClass}`; confetti.style.left = `${Math.random() * 100}vw`; confetti.style.animationDelay = `${Math.random() * 2}s`; confetti.style.transform = `rotate(${Math.random() * 360}deg)`; confettiContainer.appendChild(confetti); setTimeout(() => { confetti.remove(); }, 7000); }
+        /** Creates a single piece of falling confetti. */
+        function createConfettiPiece() { if (!confettiContainer) return; const confetti = document.createElement('div'); const randomClass = `c${Math.floor(Math.random() * 5)}`; confetti.className = `confetti ${randomClass}`; confetti.style.left = `${Math.random() * 100}vw`; confetti.style.animationDelay = `${Math.random() * 2}s`; confetti.style.transform = `rotate(${Math.random() * 360}deg)`; confettiContainer.appendChild(confetti); setTimeout(() => { confetti.remove(); }, 7000); } // Remove after animation finishes
 
     </script>
     </body>
 </html>
+
