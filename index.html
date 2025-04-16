@@ -926,16 +926,19 @@
          * Initializes the game when the window loads.
          * Loads entries, populates static content, updates displays, and shows the intro section.
          */
-        window.onload = function() {
-            collectedEntries = loadEntriesFromStorage();
-            saveEntriesToStorage(); // Ensure defaults or loaded data is saved back initially
-            populateFunFacts();
-            populateFactWall(); // Populate the main wall on load
-            updateScoreDisplay();
-            updateBuildResourcesDisplay(); // Initialize build section displays
-            updateEnergyCollectedDisplay();
-            showSection('intro'); // Start at the intro
-        };
+      // --- Replace your existing window.onload function with this ---
+window.onload = function() {
+    collectedEntries = []; // Start with an empty list for dynamic loading
+     // Or keep starter entries if you want them displayed initially
+    STARTER_ENTRIES.forEach(entry => { collectedEntries.push(entry); });
+
+    populateFunFacts(); // Static fun facts are okay
+    // Don't populate walls on load, do it when section is shown
+    updateScoreDisplay();
+    updateBuildResourcesDisplay();
+    updateEnergyCollectedDisplay();
+    showSection('intro');
+};
 
         // --- Core Functions ---
 
@@ -960,23 +963,18 @@
             collectedEntries.forEach(entry => addEntryToWall(factWall, entry));
         }
 
-        /**
-         * Populates the list of collected questions and thoughts in the 'collected-questions' section.
-         */
-        function populateCollectedQuestions() {
-             collectedQuestionsList.innerHTML = ''; // Clear existing
-             const questionsAndThoughts = collectedEntries.filter(entry => entry.type === 'thought');
-             questionsAndThoughts.forEach(entry => addEntryToWall(collectedQuestionsList, entry));
-        }
-
-        /**
-         * Populates the list of collected birthday wishes in the 'collected-wishes' section.
-         */
-         function populateCollectedWishes() {
-             collectedWishesList.innerHTML = ''; // Clear existing
-             const wishes = collectedEntries.filter(entry => entry.type === 'wish');
-             wishes.forEach(entry => addEntryToWall(collectedWishesList, entry));
-         }
+       // --- Replace your existing populateCollectedQuestions function with this ---
+async function populateCollectedQuestions() {
+    collectedQuestionsList.innerHTML = '<li>Loading questions...</li>'; // Show loading message
+    const questionsAndThoughts = await fetchDataFromBackend('thoughts', 20); // Ask backend for thoughts
+    collectedQuestionsList.innerHTML = ''; // Clear loading message
+    if (questionsAndThoughts.length === 0) {
+         collectedQuestionsList.innerHTML = '<li>No questions or thoughts shared yet!</li>';
+    } else {
+         // Display the thoughts fetched from the sheet
+         questionsAndThoughts.forEach(entry => addEntryToWall(collectedQuestionsList, entry));
+    }
+}
 
         /**
          * Adds a single entry (fact, thought, or wish) to a specified list element.
@@ -1006,6 +1004,19 @@
             listElement.insertBefore(li, listElement.firstChild);
         }
 
+// --- Replace your existing populateCollectedQuestions function with this ---
+async function populateCollectedQuestions() {
+    collectedQuestionsList.innerHTML = '<li>Loading questions...</li>'; // Show loading message
+    const questionsAndThoughts = await fetchDataFromBackend('thoughts', 20); // Ask backend for thoughts
+    collectedQuestionsList.innerHTML = ''; // Clear loading message
+    if (questionsAndThoughts.length === 0) {
+         collectedQuestionsList.innerHTML = '<li>No questions or thoughts shared yet!</li>';
+    } else {
+         // Display the thoughts fetched from the sheet
+         questionsAndThoughts.forEach(entry => addEntryToWall(collectedQuestionsList, entry));
+    }
+}
+        
         /**
          * Gets a user-friendly label for the type of entry.
          * @param {object} entry - The entry object.
@@ -1018,28 +1029,77 @@
         }
 
         /**
+
+        // --- Replace your existing populateCollectedWishes function with this ---
+async function populateCollectedWishes() {
+     collectedWishesList.innerHTML = '<li>Loading wishes...</li>'; // Show loading message
+     const wishes = await fetchDataFromBackend('wishes', 30); // Ask backend for wishes
+     collectedWishesList.innerHTML = ''; // Clear loading message
+      if (wishes.length === 0) {
+         collectedWishesList.innerHTML = '<li>No birthday wishes yet!</li>';
+      } else {
+         // Display wishes fetched from the sheet
+         wishes.forEach(entry => addEntryToWall(collectedWishesList, entry));
+      }
+}
+
+// --- Replace your existing populateFactWall function with this ---
+async function populateFactWall() {
+    factWall.innerHTML = '<li>Loading contributions...</li>'; // Show loading message
+    const thoughts = await fetchDataFromBackend('thoughts', 25); // Get thoughts
+    const wishes = await fetchDataFromBackend('wishes', 25); // Get wishes
+    const allEntries = [...thoughts, ...wishes]; // Combine them
+    // Optional: Sort if timestamps are reliable
+    // allEntries.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+    factWall.innerHTML = ''; // Clear loading message
+     if (allEntries.length === 0) {
+        factWall.innerHTML = '<li>No contributions submitted yet!</li>';
+     } else {
+         // Display all fetched entries
+        allEntries.forEach(entry => addEntryToWall(factWall, entry));
+     }
+     // You can still add starter entries if you like:
+     // STARTER_ENTRIES.forEach(entry => addEntryToWall(factWall, entry));
+}
          * Shows a specific game section and updates the progress bar and visuals.
          * @param {string} sectionId - The ID of the section to show.
          */
-        function showSection(sectionId) {
-            // Hide all sections
-            document.querySelectorAll('.game-section').forEach(section => {
-                section.classList.remove('active');
-            });
-            // Show the target section
-            const element = document.getElementById(sectionId);
-            if (element) {
-                element.classList.add('active');
-            } else {
-                console.error("Section not found:", sectionId);
-                return;
-            }
+    // --- Replace your existing showSection function with this ---
+function showSection(sectionId) {
+    // Hide all sections
+    document.querySelectorAll('.game-section').forEach(section => { section.classList.remove('active'); });
+    // Show the target section
+    const element = document.getElementById(sectionId);
+    if (element) { element.classList.add('active'); }
+    else { console.error("Section not found:", sectionId); return; }
 
-             // Clear build feedback when leaving the build section or entering it
-             if (buildFeedback) {
-                 buildFeedback.innerHTML = '<p>Awaiting your command, Commander!</p>';
-                 buildFeedback.className = 'build-feedback'; // Reset style
-             }
+    // Clear build feedback if needed
+    if (buildFeedback) {
+        buildFeedback.innerHTML = '<p>Awaiting your command, Commander!</p>';
+        buildFeedback.className = 'build-feedback';
+    }
+
+    // Update progress bar
+    const sections = ['intro', 'fun-facts', 'concept', 'feasibility', 'importance', 'build', 'share-thoughts', 'collected-questions', 'collected-wishes', 'conclusion'];
+    const currentIndex = sections.indexOf(sectionId);
+    const progressPercent = (currentIndex / (sections.length - 1)) * 100;
+    progressBar.style.width = progressPercent + '%';
+
+    // Update visuals
+    updateCosmicVisuals(sectionId);
+
+    // --- Load data when needed ---
+    if (sectionId === 'collected-questions') { populateCollectedQuestions(); }
+    if (sectionId === 'collected-wishes') { populateCollectedWishes(); }
+    if (sectionId === 'conclusion') {
+         finalizeResults(); // This might call populateFactWall
+         saveFeedback.style.display = 'none'; saveFeedback.textContent = ''; saveFeedback.className = 'feedback';
+    }
+    if (sectionId === 'build') {
+        updateBuildResourcesDisplay(); updateBuildButtons(); updateEnergyCollectedDisplay();
+    }
+}
 
             // Update progress bar
             const sections = ['intro', 'fun-facts', 'concept', 'feasibility', 'importance', 'build', 'share-thoughts', 'collected-questions', 'collected-wishes', 'conclusion'];
@@ -1266,109 +1326,138 @@
             }
         }
 
-        /**
-         * Submits a user's thought/fact/question. Adds it to the local list and storage.
-         */
-        function submitThought() {
-             const thoughtText = sharedThoughtInput.value.trim();
-             const isNotFact = sharedFactCheck.checked;
+// --- Replace your entire existing submitThought function with this one ---
+let thoughtDataForSubmission = null; // Variable to hold the thought data
 
-             if (thoughtText) {
-                 const currentName = nameInput.value.trim() || userName; // Use name if entered, else default
-                 const newEntry = {
-                     text: thoughtText,
-                     name: currentName,
-                     isFact: !isNotFact,
-                     type: 'thought' // Mark as thought/question/fact
-                 };
+function submitThought() {
+    const thoughtText = sharedThoughtInput.value.trim();
+    const isNotFact = sharedFactCheck.checked;
 
-                 collectedEntries.unshift(newEntry); // Add to start of array
-                 addEntryToWall(factWall, newEntry); // Add visually to the main wall immediately
-                 saveEntriesToStorage(); // Save updated array
+    if (thoughtText) {
+        const currentName = nameInput.value.trim() || userName; // Use name if entered, else default
+        const isFactActual = !isNotFact;
+        const newEntry = {
+            text: thoughtText,
+            name: currentName,
+            isFact: isFactActual,
+            type: 'thought'
+        };
 
-                 lastSubmittedThoughtText = thoughtText; // Store this thought for potential saving later
-                 sectionState.thoughtSubmittedThisSession = true; // Mark as submitted for this session
+        // Store the data needed for the final POST request
+        thoughtDataForSubmission = {
+            thought: thoughtText,
+            isFact: isFactActual // Make sure we remember if it was a fact
+        };
+        sectionState.thoughtSubmittedThisSession = true; // Mark that a thought was entered
 
-                 sharedThoughtInput.value = ''; // Clear input
-                 sharedFactCheck.checked = false;
+        // --- Update UI ---
+        sharedThoughtInput.value = '';
+        sharedFactCheck.checked = false;
+        const originalText = submitThoughtButton.textContent;
+        submitThoughtButton.textContent = 'Added!';
+        submitThoughtButton.disabled = true;
+        setTimeout(() => {
+            submitThoughtButton.textContent = originalText;
+            submitThoughtButton.disabled = false;
+        }, 1500);
 
-                 // Provide visual feedback on the button
-                 const originalText = submitThoughtButton.textContent;
-                 submitThoughtButton.textContent = 'Added!';
-                 submitThoughtButton.disabled = true; // Briefly disable
-                 setTimeout(() => {
-                     submitThoughtButton.textContent = originalText;
-                     submitThoughtButton.disabled = false;
-                 }, 1500);
+        score += 5;
+        updateScoreDisplay();
 
-                 score += 5; // Award points for contribution
-                 updateScoreDisplay();
-             } else {
-                 alert("Please share a thought or fact first!");
-             }
+        // Optional: Add to local display immediately if you want
+        // addEntryToWall(factWall, newEntry);
+        // if (document.getElementById('collected-questions').classList.contains('active')) {
+        //      addEntryToWall(collectedQuestionsList, newEntry);
+        // }
+
+    } else {
+        alert("Please share a thought or fact first!");
+    }
+}
+
+   // --- Replace your entire existing submitBirthdayWish function with this one ---
+async function submitBirthdayWish() {
+    if (sectionState.wishSubmitted) {
+        alert("You've already submitted your wish and results!");
+        return;
+    }
+    const wishText = birthdayWishInput.value.trim();
+    const finalName = nameInput.value.trim();
+
+    if (!finalName) { alert("Please enter your name to sign your wish and save results!"); nameInput.focus(); return; }
+    userName = finalName;
+    displayName.textContent = userName;
+
+    if (!wishText) { alert("Please write a birthday wish for Mary!"); birthdayWishInput.focus(); return; }
+
+    // Prepare Data to Send
+    const dataToSend = {
+        name: userName,
+        score: score,
+        efficiency: energyCollected,
+        thought: sectionState.thoughtSubmittedThisSession ? thoughtDataForSubmission?.thought : null,
+        isFact: sectionState.thoughtSubmittedThisSession ? thoughtDataForSubmission?.isFact : null, // Send isFact status too
+        wish: wishText,
+        timestamp: new Date().toISOString()
+    };
+
+    // Update UI - Show "Saving..."
+    submitWishButton.disabled = true;
+    submitWishButton.textContent = 'Saving...';
+    saveFeedback.textContent = 'Saving your results...';
+    saveFeedback.className = 'feedback saving';
+    saveFeedback.style.display = 'block';
+
+    // Try Sending the Data
+    try {
+        const response = await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            cache: 'no-cache',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // Send as plain text
+            body: JSON.stringify(dataToSend) // Turn the data into a string
+        });
+
+        const result = await response.json(); // Get the reply from the helper script
+
+        if (result.status === "success") { // Hooray! The script said it worked!
+            saveFeedback.textContent = 'Results saved successfully! Thank you!';
+            saveFeedback.className = 'feedback save-success';
+            sectionState.wishSubmitted = true;
+            thoughtDataForSubmission = null; // Clear temporary data
+            sectionState.thoughtSubmittedThisSession = false;
+            submitWishButton.textContent = "Results Saved!";
+            score += 10;
+            updateScoreDisplay();
+            startConfetti();
+        } else { // Uh oh, the script reported an error
+            throw new Error(result.message || "Unknown error from backend.");
         }
 
-        /**
-         * Submits the final birthday wish, updates local storage, and attempts to save results to the backend.
-         */
-        async function submitBirthdayWish() {
-             if (sectionState.wishSubmitted) {
-                 alert("You've already submitted your wish and results!");
-                 return;
-             }
+    } catch (error) { // Problem contacting the script or getting reply
+        console.error('Error sending data:', error);
+        saveFeedback.textContent = `Error saving results: ${error.message}. Your wish might not be saved online.`;
+        saveFeedback.className = 'feedback save-error';
+        submitWishButton.textContent = "Save Failed (Retry?)";
+        submitWishButton.disabled = false; // Allow retry
+    }
+}
 
-             const wishText = birthdayWishInput.value.trim();
-             const finalName = nameInput.value.trim();
-
-             // --- Input Validation ---
-             if (!finalName) {
-                 alert("Please enter your name to sign your wish and save results!");
-                 nameInput.focus();
-                 return;
-             }
-             userName = finalName; // Update the stored username
-             displayName.textContent = userName; // Update display immediately
-
-             if (!wishText) {
-                 alert("Please write a birthday wish for Mary!");
-                 birthdayWishInput.focus();
-                 return;
-             }
-
-             // --- Add Wish Locally ---
-             const newEntry = {
-                 text: wishText,
-                 name: userName,
-                 isFact: false, // Wishes are not facts
-                 type: 'wish' // Mark as a wish
-             };
-
-             collectedEntries.unshift(newEntry); // Add to the beginning of the main list
-             addEntryToWall(factWall, newEntry); // Add visually to the main wall
-             // If the collected wishes section is currently visible, update it too
-             if (document.getElementById('collected-wishes').classList.contains('active')) {
-                addEntryToWall(collectedWishesList, newEntry);
-             }
-             saveEntriesToStorage(); // Save updated array including the new wish
-
-             // --- Prepare Data for Backend ---
-             const dataToSend = {
-                name: userName,
-                score: score,
-                efficiency: energyCollected,
-                // Only include the thought if one was submitted *during this session*
-                thought: sectionState.thoughtSubmittedThisSession ? lastSubmittedThoughtText : null,
-                wish: wishText,
-                timestamp: new Date().toISOString() // Add a timestamp
-             };
-
-             // --- Update UI - Disable Button, Show Saving Message ---
-             submitWishButton.disabled = true;
-             submitWishButton.textContent = 'Saving...';
-             saveFeedback.textContent = 'Saving your results...';
-             saveFeedback.className = 'feedback saving'; // Use 'saving' style
-             saveFeedback.style.display = 'block';
-
+        // --- Add this new function somewhere in your <script> area ---
+async function fetchDataFromBackend(type = 'thoughts', limit = 20) {
+    try {
+        // Ask the helper script for data (using the GET part)
+        const response = await fetch(`<span class="math-inline">\{GOOGLE\_SCRIPT\_URL\}?type\=</span>{type}&limit=${limit}`);
+        if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`); }
+        const result = await response.json(); // Get the reply
+        if (result.status === 'success') {
+            return result.data; // Return the list of thoughts or wishes
+        } else {
+            console.error("Backend Error:", result.message); return [];
+        }
+    } catch (error) {
+        console.error(`Could not fetch ${type}:`, error); return [];
+    }
+}
              // --- Send Data to Google Apps Script ---
              try {
                 console.log("Sending data to backend:", JSON.stringify(dataToSend)); // Log data being sent
@@ -1419,36 +1508,14 @@
         /**
          * Updates the final score and name display on the conclusion page.
          */
-        function finalizeResults() {
-            finalScoreDisplay.textContent = score;
-            finalEnergyDisplay.textContent = energyCollected; // Display the final efficiency
-            displayName.textContent = nameInput.value.trim() || userName;
-            populateFactWall(); // Ensure the main wall on the conclusion page is fully up-to-date
-        }
 
-        // --- Visual Effect Functions ---
-
-        /**
-         * Updates the cosmic visualization based on the current game section.
-         * @param {string} sectionId - The ID of the currently active section.
-         */
-        function updateCosmicVisuals(sectionId) {
-            // Clear previous visuals before adding new ones for the current section
-             ['conceptContainer', 'feasibilityContainer', 'importanceContainer', 'buildContainer'].forEach(id => {
-                 if (id !== `${sectionId}Container`) { // Don't clear the container we are about to draw in
-                     clearCosmicVisuals(id);
-                 }
-             });
-
-             const container = document.getElementById(`${sectionId}Container`);
-             if (!container) return; // Exit if the section doesn't have a visual container
-
-             // Ensure the star is always present in its container
-             if (!container.querySelector('.star')) {
-                 const star = document.createElement('div');
-                 star.className = 'star';
-                 container.appendChild(star);
-             }
+        // --- Replace your existing finalizeResults function with this ---
+async function finalizeResults() { // Make it async to wait for data
+    finalScoreDisplay.textContent = score;
+    finalEnergyDisplay.textContent = energyCollected;
+    displayName.textContent = nameInput.value.trim() || userName;
+    await populateFactWall(); // Load the latest data for the final wall
+}
 
              // Add elements based on the current section
              switch (sectionId) {
