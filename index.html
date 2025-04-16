@@ -1193,7 +1193,7 @@
          */
         async function fetchDataFromBackend(type = 'thoughts', limit = 20) {
             // Safety check: Ensure the URL is not the placeholder
-            if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL === 'YOUR_NEW_DEPLOYMENT_URL_HERE') {
+            if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbwXohgrElA2ImjfAxK4eUvtgHxZuuoqWuFgCdbmTvBE35pgDA3XwtIeX91PE2iSCvi2/exec') {
                 console.error("Google Apps Script URL is not set! Cannot fetch data.");
                 // Don't alert here, just return empty to avoid spamming user
                 return []; // Return empty array if URL is not set
