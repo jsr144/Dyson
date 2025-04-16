@@ -808,9 +808,8 @@
         </div>
     </div> <script>
         // --- Constants ---
-        // !!! IMPORTANT: REPLACE THIS URL WITH YOUR ACTUAL GOOGLE APPS SCRIPT WEB APP URL !!!
-        // !!! ALSO REMOVE THE TRAILING SPACE IF YOU PASTE IT IN !!!
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwXohgrElA2ImjfAxK4eUvtgHxZuuoqWuFgCdbmTvBE35pgDA3XwtIeX91PE2iSCvi2/exec'; // <-- PASTE YOUR URL HERE
+        // !!! IMPORTANT: ENSURE THIS URL IS CORRECT FOR YOUR LATEST DEPLOYMENT !!!
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwXohgrElA2ImjfAxK4eUvtgHxZuuoqWuFgCdbmTvBE35pgDA3XwtIeX91PE2iSCvi2/exec'; // <-- VERIFY THIS URL!
 
         const MAX_PANELS = 12; // Max panels for visualization
         const DYSON_FUN_FACTS = [ // Static data for the fun facts section
@@ -832,30 +831,28 @@
         ];
 
         // --- State Variables ---
-        // These variables track the user's progress and choices
-        let score = 0; // User's fun points
-        let currentResources = 100; // Points for the build section
-        let energyCollected = 0; // Efficiency from the build section
-        let userName = "Explorer"; // Default user name
-        let thoughtDataForSubmission = null; // Temporarily holds the thought data before final submission
-        let buildAllocations = { phase1: 0, phase2: 0, phase3: 0, phase4: 0 }; // Tracks build choices
-        let sectionState = { // Tracks quiz answers and submission status
+        let score = 0;
+        let currentResources = 100;
+        let energyCollected = 0;
+        let userName = "Explorer";
+        let thoughtDataForSubmission = null;
+        let buildAllocations = { phase1: 0, phase2: 0, phase3: 0, phase4: 0 };
+        let sectionState = {
             'concept': { answered: false },
             'feasibility': { answered: false },
             'importance': { answered: false },
             'thoughtSubmittedThisSession': false,
             'wishSubmitted': false
         };
-        let collectedEntries = []; // Stores entries currently displayed (can include starters)
+        let collectedEntries = [];
 
-        // --- DOM Elements (cache them for quicker access) ---
-        // Get references to various parts of the HTML page to interact with them
+        // --- DOM Elements ---
         const scoreDisplay = document.getElementById('score');
         const progressBar = document.getElementById('progressBar');
-        const factWall = document.getElementById('fact-wall'); // Final wall
-        const collectedQuestionsList = document.getElementById('collected-questions-list'); // Questions wall
-        const collectedWishesList = document.getElementById('collected-wishes-list'); // Wishes wall
-        const funFactsList = document.getElementById('fun-facts-list'); // Static facts list
+        const factWall = document.getElementById('fact-wall');
+        const collectedQuestionsList = document.getElementById('collected-questions-list');
+        const collectedWishesList = document.getElementById('collected-wishes-list');
+        const funFactsList = document.getElementById('fun-facts-list');
         const nameInput = document.getElementById('name-input');
         const birthdayWishInput = document.getElementById('birthday-wish');
         const sharedThoughtInput = document.getElementById('shared-thought');
@@ -863,43 +860,33 @@
         const displayName = document.getElementById('display-name');
         const finalScoreDisplay = document.getElementById('final-score');
         const finalEnergyDisplay = document.getElementById('final-energy');
-        const resourcesBuildDisplay = document.getElementById('resources-build-display'); // Build points label
-        const resourcesBuild = document.getElementById('resources-build'); // Build points counter
-        const energyCollectedDisplay = document.getElementById('energy-collected'); // Build efficiency display
-        const buildFeedback = document.getElementById('build-feedback'); // Build section messages
-        const confettiContainer = document.getElementById('confettiContainer'); // For celebration animation
+        const resourcesBuildDisplay = document.getElementById('resources-build-display');
+        const resourcesBuild = document.getElementById('resources-build');
+        const energyCollectedDisplay = document.getElementById('energy-collected');
+        const buildFeedback = document.getElementById('build-feedback');
+        const confettiContainer = document.getElementById('confettiContainer');
         const submitThoughtButton = document.getElementById('submit-thought-button');
         const submitWishButton = document.getElementById('submit-wish-button');
-        const saveFeedback = document.getElementById('save-feedback'); // Message area on final page
+        const saveFeedback = document.getElementById('save-feedback');
 
         // --- Initial Setup ---
-        // This function runs automatically when the webpage finishes loading
         window.onload = function() {
-            collectedEntries = []; // Start with an empty list for dynamic loading
-             // Add starter entries so the page isn't blank initially
-            STARTER_ENTRIES.forEach(entry => { collectedEntries.push(entry); });
+            collectedEntries = [...STARTER_ENTRIES]; // Start with starter entries
+            populateFunFacts();
+            updateScoreDisplay();
+            updateBuildResourcesDisplay();
+            updateEnergyCollectedDisplay();
+            showSection('intro');
 
-            populateFunFacts(); // Display the built-in fun facts
-            // Don't populate dynamic walls on load, wait until sections are shown
-            updateScoreDisplay(); // Set initial score display
-            updateBuildResourcesDisplay(); // Set initial build points display
-            updateEnergyCollectedDisplay(); // Set initial build efficiency display
-            showSection('intro'); // Show the first section ('intro')
-
-            // Add a check for the placeholder URL on load
-             if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE') {
-                console.warn("WARNING: GOOGLE_SCRIPT_URL is not set. Saving and loading contributions will not work.");
-                // Optionally display a non-intrusive warning to the user if desired
-                // For example: add a small banner or modify a footer text
+            if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE') {
+                console.warn("WARNING: GOOGLE_SCRIPT_URL is not set or is a placeholder. Saving and loading contributions will not work.");
             }
         };
 
         // --- Core Functions ---
 
-        /**
-         * Populates the fun facts list in the 'fun-facts' section with predefined facts.
-         */
         function populateFunFacts() {
+            // ... (no changes needed)
             if (!funFactsList) return; // Safety check
             funFactsList.innerHTML = ''; // Clear any previous list items
             DYSON_FUN_FACTS.forEach(fact => { // Loop through each fact
@@ -909,12 +896,8 @@
             });
         }
 
-        /**
-         * Adds a single entry (fact, thought, wish) to a specified list element on the page.
-         * @param {HTMLElement} listElement - The UL element to add the entry to (e.g., factWall, collectedQuestionsList).
-         * @param {object} entry - The entry object { text, name, isFact, type }.
-         */
         function addEntryToWall(listElement, entry) {
+            // ... (no changes needed)
             if (!listElement) return; // Safety check if the list doesn't exist
             const li = document.createElement('li'); // Create list item
             const textNode = document.createTextNode(entry.text || ''); // Create text for the entry
@@ -935,12 +918,8 @@
             listElement.insertBefore(li, listElement.firstChild);
         }
 
-        /**
-         * Gets a user-friendly label for the type of entry.
-         * @param {object} entry - The entry object.
-         * @returns {string} The label ('Wish', 'Fact', 'Thought/Idea').
-         */
         function getEntryTypeLabel(entry) {
+            // ... (no changes needed)
             if (entry.type === 'wish') return 'Wish';
             // Check if it's a thought type before checking isFact
             if (entry.type === 'thought') return entry.isFact ? 'Fact' : 'Thought/Idea';
@@ -948,11 +927,8 @@
             return 'Contribution'; // Default fallback
         }
 
-        /**
-         * Shows a specific game section and hides others. Handles dynamic data loading.
-         * @param {string} sectionId - The ID of the section div to show.
-         */
         function showSection(sectionId) {
+            // ... (no changes needed)
             // Hide all sections first
             document.querySelectorAll('.game-section').forEach(section => { section.classList.remove('active'); });
             // Find the section to show
@@ -993,11 +969,9 @@
             }
         }
 
-        /**
-         * Updates the score display on the page with a small animation.
-         */
         function updateScoreDisplay() {
-            if (!scoreDisplay) return; // Safety check
+            // ... (no changes needed)
+             if (!scoreDisplay) return; // Safety check
             scoreDisplay.textContent = score; // Update the number
             scoreDisplay.classList.add('resource-animation'); // Add animation class
             // Remove animation class after a short delay
@@ -1006,30 +980,25 @@
 
 
         // --- Build Section Specific Functions ---
-        // These handle the logic for the "Build Your Own" section
-
-        /** Updates the display for remaining Design Points. */
-        function updateBuildResourcesDisplay() {
-            const pointsText = currentResources;
+        function updateBuildResourcesDisplay() { /* ... (no changes) ... */
+             const pointsText = currentResources;
             if(resourcesBuildDisplay) resourcesBuildDisplay.textContent = pointsText; // Update label
             if(resourcesBuild) resourcesBuild.textContent = pointsText; // Update counter
             if(resourcesBuild) { // Animate the counter
                 resourcesBuild.classList.add('resource-animation');
                 setTimeout(() => resourcesBuild.classList.remove('resource-animation'), 500);
             }
-        }
-        /** Calculates and updates the Blueprint Efficiency display. */
-        function updateEnergyCollectedDisplay() {
-             let calculatedEnergy = Math.min(100, // Cap at 100%
+         }
+        function updateEnergyCollectedDisplay() { /* ... (no changes) ... */
+            let calculatedEnergy = Math.min(100, // Cap at 100%
                  (buildAllocations.phase1 * 10) + (buildAllocations.phase2 * 25) +
                  (buildAllocations.phase3 * 8) + (buildAllocations.phase4 * 5)
              );
             energyCollected = Math.round(calculatedEnergy);
             if(energyCollectedDisplay) energyCollectedDisplay.textContent = energyCollected; // Update display
         }
-        /** Executes a build phase: deducts points, updates state, gives feedback. */
-        function runMissionPhase(phase, cost) {
-             if (currentResources >= cost) { // Check if enough points
+        function runMissionPhase(phase, cost) { /* ... (no changes) ... */
+            if (currentResources >= cost) { // Check if enough points
                  currentResources -= cost; // Deduct points
                  buildAllocations[phase] = (buildAllocations[phase] || 0) + 1; // Track phase completion
                  // Update displays
@@ -1057,8 +1026,7 @@
                  }
              }
         }
-        /** Enables/disables build phase buttons based on available points. */
-        function updateBuildButtons() {
+        function updateBuildButtons() { /* ... (no changes) ... */
             document.querySelectorAll('.build-choices .build-btn').forEach(button => {
                 const onclickAttr = button.getAttribute('onclick'); // Get the button's action
                 // Extract the cost from the onclick attribute text
@@ -1072,25 +1040,17 @@
                 }
             });
         }
-        /** Adds panel elements to the 'build' section's visual sphere. */
-        function addPanelToVisual(count = 1) {
+        function addPanelToVisual(count = 1) { /* ... (no changes) ... */
             const container = document.getElementById('buildContainer'); if (!container) return;
             const panelCount = container.querySelectorAll('.cosmic-panel').length; if (panelCount >= MAX_PANELS) return; // Limit panels
             const panelsToAdd = Math.min(count, MAX_PANELS - panelCount); // Calculate how many can be added
             addMorePanels(container, panelsToAdd); // Call the function to actually add them
         }
-        // --- End of Build Section Functions ---
 
 
         // --- Quiz and Submission Functions ---
 
-        /**
-         * Handles the selection of an option in a multiple-choice question.
-         * @param {HTMLElement} element - The clicked option div.
-         * @param {string} questionId - The ID of the question (e.g., 'concept').
-         * @param {boolean} isCorrect - Whether the selected option is the correct answer.
-         */
-        function selectOption(element, questionId, isCorrect) {
+        function selectOption(element, questionId, isCorrect) { /* ... (no changes) ... */
             if (sectionState[questionId].answered) return; // Prevent answering twice
             sectionState[questionId].answered = true; // Mark as answered
 
@@ -1133,13 +1093,7 @@
             nextButton.style.display = 'inline-block'; // Show the 'Next' button
         }
 
-        /**
-         * Returns specific feedback text for each quiz question.
-         * @param {string} questionId - The ID of the question.
-         * @param {boolean} isCorrect - Whether the user's answer was correct.
-         * @returns {string} Feedback text.
-         */
-        function getFeedbackText(questionId, isCorrect) {
+        function getFeedbackText(questionId, isCorrect) { /* ... (no changes) ... */
             // Provides explanatory text for quiz answers
             switch (questionId) {
                 case 'concept': return isCorrect ? "Dyson proposed a 'swarm' of collectors. A solid shell is likely unstable!" : "While sci-fi loves solid shells, Dyson proposed a 'swarm' of many collectors. A solid shell would face huge gravitational stress!";
@@ -1149,10 +1103,7 @@
             }
         }
 
-        /**
-         * Handles submission of a thought/fact/question. Stores it temporarily for final submission.
-         */
-        function submitThought() {
+        function submitThought() { /* ... (no changes) ... */
             if (!sharedThoughtInput || !sharedFactCheck || !submitThoughtButton) return; // Safety check
 
             const thoughtText = sharedThoughtInput.value.trim(); // Get text from input
@@ -1203,13 +1154,8 @@
         }
 
 
-        /**
-         * Fetches data (thoughts or wishes) from the Google Apps Script backend.
-         * @param {string} [type='thoughts'] - The type of data to fetch ('thoughts' or 'wishes').
-         * @param {number} [limit=20] - The maximum number of items to fetch.
-         * @returns {Promise<Array>} A promise that resolves to an array of fetched entries.
-         */
         async function fetchDataFromBackend(type = 'thoughts', limit = 20) {
+            // ... (no changes needed in GET request)
             // Safety check: Ensure the URL is not the placeholder
             if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE') {
                 console.error("Google Apps Script URL is not set! Cannot fetch data.");
@@ -1238,10 +1184,7 @@
             }
         }
 
-        /**
-         * Populates the collected questions list by fetching data from the backend.
-         */
-        async function populateCollectedQuestions() {
+        async function populateCollectedQuestions() { /* ... (no changes) ... */
             if (!collectedQuestionsList) return; // Safety check
             collectedQuestionsList.innerHTML = '<li>Loading questions...</li>'; // Show loading message
             const questionsAndThoughts = await fetchDataFromBackend('thoughts', 20); // Ask backend for thoughts
@@ -1254,11 +1197,8 @@
             }
         }
 
-        /**
-         * Populates the collected wishes list by fetching data from the backend.
-         */
-        async function populateCollectedWishes() {
-            if (!collectedWishesList) return; // Safety check
+        async function populateCollectedWishes() { /* ... (no changes) ... */
+             if (!collectedWishesList) return; // Safety check
             collectedWishesList.innerHTML = '<li>Loading wishes...</li>'; // Show loading message
             const wishes = await fetchDataFromBackend('wishes', 30); // Ask backend for wishes
             collectedWishesList.innerHTML = ''; // Clear loading message
@@ -1270,27 +1210,27 @@
              }
         }
 
-        /**
-         * Populates the final wall on the conclusion page by fetching all contributions.
-         */
-        async function populateFactWall() {
+        async function populateFactWall() { /* ... (no changes) ... */
             if (!factWall) return; // Safety check
             factWall.innerHTML = '<li>Loading contributions...</li>'; // Show loading message
             const thoughts = await fetchDataFromBackend('thoughts', 25); // Get recent thoughts
             const wishes = await fetchDataFromBackend('wishes', 25); // Get recent wishes
 
             // Combine fetched data with starter entries for a fuller list
-            const allEntries = [...STARTER_ENTRIES, ...thoughts, ...wishes];
+            // Ensure starter entries are not duplicated if they also exist in fetched data
+            const combinedEntries = [...thoughts, ...wishes];
+            const uniqueFetchedTexts = new Set(combinedEntries.map(e => e.text));
+            const entriesToDisplay = [
+                ...STARTER_ENTRIES.filter(starter => !uniqueFetchedTexts.has(starter.text)), // Add starters only if not fetched
+                ...combinedEntries
+            ];
 
-            // Optional: Remove duplicates if starter entries might get re-submitted
-            // This creates a new list containing only unique entries based on text, name, and type
-            const uniqueEntries = allEntries.filter((entry, index, self) =>
+             // Simple deduplication based on text and name (might need refinement based on timestamp if available)
+             const uniqueEntries = entriesToDisplay.filter((entry, index, self) =>
                  index === self.findIndex((e) => (
                      e.text === entry.text && e.name === entry.name && e.type === entry.type
                  ))
-            );
-             // Optional: Sort if timestamps are reliable and available in fetched data
-             // uniqueEntries.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+             );
 
             factWall.innerHTML = ''; // Clear loading message
              if (uniqueEntries.length === 0) { // If still empty after combining
@@ -1303,27 +1243,26 @@
 
         /**
          * Submits the final results (score, name, wish, thought) to the Google Apps Script backend.
+         * --- UPDATED TO HANDLE CORS AND RESPONSE PROPERLY ---
          */
         async function submitBirthdayWish() {
             // --- Safety check: Ensure the backend URL is configured ---
             if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE') {
                  console.error("Google Apps Script URL is not set!");
-                 // Use a less intrusive method than alert
                  if (saveFeedback) {
                     saveFeedback.textContent = 'Error: Backend connection not configured. Cannot save results.';
                     saveFeedback.className = 'feedback save-error';
                     saveFeedback.style.display = 'block';
                  }
-                 return; // Stop execution if URL is missing
+                 return;
              }
 
             // --- Prevent double submission ---
             if (sectionState.wishSubmitted) {
                 console.warn("Attempted to submit wish again.");
-                // Maybe update feedback instead of alert
                 if (saveFeedback) {
                     saveFeedback.textContent = "You've already submitted your wish and results!";
-                    saveFeedback.className = 'feedback info'; // Use info style
+                    saveFeedback.className = 'feedback info';
                     saveFeedback.style.display = 'block';
                 }
                 return;
@@ -1334,7 +1273,7 @@
             const finalName = nameInput?.value.trim();
 
             // --- Validate inputs ---
-            if (!finalName) {
+            if (!finalName) { /* ... (validation as before) ... */
                 console.warn("Name input missing.");
                 if (nameInput) nameInput.focus();
                 if (saveFeedback) {
@@ -1344,11 +1283,11 @@
                 }
                 return;
             }
-            userName = finalName; // Update name globally
-            if (displayName) displayName.textContent = userName; // Update on page
+            userName = finalName;
+            if (displayName) displayName.textContent = userName;
 
-            if (!wishText) {
-                console.warn("Wish input missing.");
+            if (!wishText) { /* ... (validation as before) ... */
+                 console.warn("Wish input missing.");
                 if (birthdayWishInput) birthdayWishInput.focus();
                  if (saveFeedback) {
                     saveFeedback.textContent = 'Please write a birthday wish for Mary!';
@@ -1358,87 +1297,101 @@
                 return;
             }
 
-            // --- Prepare Data to Send to the backend ---
+            // --- Prepare Data to Send ---
             const dataToSend = {
                 name: userName,
                 score: score,
                 efficiency: energyCollected,
-                // Include thought details only if one was submitted in this session
                 thought: sectionState.thoughtSubmittedThisSession ? thoughtDataForSubmission?.thought : null,
                 isFact: sectionState.thoughtSubmittedThisSession ? thoughtDataForSubmission?.isFact : null,
                 wish: wishText,
-                timestamp: new Date().toISOString() // Add current time
+                timestamp: new Date().toISOString()
             };
 
             // --- Update UI to show "Saving..." ---
             if (submitWishButton) {
-                submitWishButton.disabled = true; // Disable button during save
+                submitWishButton.disabled = true;
                 submitWishButton.textContent = 'Saving...';
             }
             if (saveFeedback) {
                 saveFeedback.textContent = 'Saving your results...';
-                saveFeedback.className = 'feedback saving'; // Apply 'saving' style
-                saveFeedback.style.display = 'block'; // Make feedback visible
+                saveFeedback.className = 'feedback saving';
+                saveFeedback.style.display = 'block';
             }
 
-            // --- Try Sending the Data to Google Apps Script ---
+            // --- Try Sending the Data (with CORS and text/plain) ---
             try {
-                // Use 'fetch' to send data via POST
                 const response = await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'no-cors', // IMPORTANT: Use no-cors for simple POST to Apps Script if not handling CORS properly
-                    cache: 'no-cache', // Don't use cached versions
-                    headers: { 'Content-Type': 'application/json' }, // Standard JSON header
-                    // Redirect can be needed depending on Apps Script setup
-                    // redirect: 'follow',
-                    body: JSON.stringify(dataToSend) // Convert the data object to a JSON string
+                    // mode: 'cors', // Default mode, remove 'no-cors'
+                    cache: 'no-cache',
+                    headers: {
+                        // Use text/plain, common for Apps Script e.postData.contents
+                        'Content-Type': 'text/plain;charset=utf-8',
+                    },
+                    // redirect: 'follow', // Might be needed if Apps Script redirects
+                    body: JSON.stringify(dataToSend) // Send data as a JSON string
                 });
 
-                // NOTE: With mode: 'no-cors', the response object will be "opaque"
-                // We cannot directly check response.ok or response.json()
-                // We assume success if the request itself didn't throw an error.
-                // This is a limitation of simple Apps Script web app POSTs without proper CORS.
-                console.log("Data sent to backend (no-cors mode, response opaque). Assuming success if no network error.");
-
-                // --- Assume Success (due to no-cors limitation) ---
-                if (saveFeedback) {
-                    saveFeedback.textContent = 'Results sent! Thank you!'; // Adjusted message
-                    saveFeedback.className = 'feedback save-success'; // Apply 'success' style
+                // Check if the network request itself was successful
+                if (!response.ok) {
+                    // Try to get more info from the response if possible
+                    let errorText = `HTTP error! Status: ${response.status}`;
+                    try {
+                        // If the server sent back text, include it
+                        const text = await response.text();
+                        errorText += ` - ${text}`;
+                    } catch (e) { /* Ignore if can't read text */ }
+                    throw new Error(errorText);
                 }
-                sectionState.wishSubmitted = true; // Mark as submitted
-                thoughtDataForSubmission = null; // Clear temporary thought data
-                sectionState.thoughtSubmittedThisSession = false; // Reset flag
-                if (submitWishButton) submitWishButton.textContent = "Results Sent!"; // Keep button disabled, show confirmation
 
-                score += 10; // Award bonus points for submitting
-                updateScoreDisplay(); // Update score display
-                startConfetti(); // Celebrate!
+                // Try to parse the JSON response from the Apps Script
+                const result = await response.json();
 
-                // Add the wish to the local walls immediately after assumed successful send
-                const newWishEntry = { text: wishText, name: userName, isFact: false, type: 'wish' };
-                if (factWall) addEntryToWall(factWall, newWishEntry); // Add to final wall
-                const wishesSection = document.getElementById('collected-wishes');
-                 if (wishesSection && wishesSection.classList.contains('active') && collectedWishesList) {
-                     addEntryToWall(collectedWishesList, newWishEntry); // Add to wishes wall if visible
-                 }
+                // Check the status field returned by the Apps Script
+                if (result.status === "success") {
+                    // --- Handle Success ---
+                    if (saveFeedback) {
+                        saveFeedback.textContent = 'Results saved successfully! Thank you!';
+                        saveFeedback.className = 'feedback save-success';
+                    }
+                    sectionState.wishSubmitted = true;
+                    thoughtDataForSubmission = null;
+                    sectionState.thoughtSubmittedThisSession = false;
+                    if (submitWishButton) submitWishButton.textContent = "Results Saved!";
 
-            } catch (error) { // Catch network errors during fetch
-                console.error('Error sending data:', error);
+                    score += 10;
+                    updateScoreDisplay();
+                    startConfetti();
+
+                    // Add wish locally
+                    const newWishEntry = { text: wishText, name: userName, isFact: false, type: 'wish' };
+                    if (factWall) addEntryToWall(factWall, newWishEntry);
+                    const wishesSection = document.getElementById('collected-wishes');
+                     if (wishesSection && wishesSection.classList.contains('active') && collectedWishesList) {
+                         addEntryToWall(collectedWishesList, newWishEntry);
+                     }
+
+                } else {
+                    // The script returned a JSON response, but indicated an error
+                    throw new Error(result.message || "Backend script reported an unspecified error.");
+                }
+
+            } catch (error) {
+                // --- Handle Errors (Network or Script-Reported) ---
+                console.error('Error sending data or processing response:', error);
                 if (saveFeedback) {
-                    saveFeedback.textContent = `Error sending results: ${error.message}. Please try again.`;
-                    saveFeedback.className = 'feedback save-error'; // Apply 'error' style
+                    saveFeedback.textContent = `Error saving results: ${error.message}. Please check console or try again.`;
+                    saveFeedback.className = 'feedback save-error';
                 }
                 if (submitWishButton) {
-                    submitWishButton.textContent = "Save Failed (Retry?)"; // Change button text
-                    submitWishButton.disabled = false; // Re-enable button to allow retry
+                    submitWishButton.textContent = "Save Failed (Retry?)";
+                    submitWishButton.disabled = false; // Re-enable button
                 }
             }
         }
 
-        /**
-         * Updates the final score/name display and populates the main contribution wall.
-         */
-        async function finalizeResults() { // Make it async because it calls an async function
+        async function finalizeResults() { /* ... (no changes) ... */
             if (finalScoreDisplay) finalScoreDisplay.textContent = score; // Update final score display
             if (finalEnergyDisplay) finalEnergyDisplay.textContent = energyCollected; // Update final efficiency display
             if (displayName) displayName.textContent = nameInput?.value.trim() || userName; // Update displayed name
@@ -1447,10 +1400,7 @@
 
 
         // --- Visual Effect Functions ---
-        // These handle the animations and dynamic visuals like the cosmic sphere and confetti
-
-        /** Updates the cosmic sphere visualization based on the current section. */
-        function updateCosmicVisuals(sectionId) {
+        function updateCosmicVisuals(sectionId) { /* ... (no changes) ... */
              // Clear visuals from other sections first
              ['conceptContainer', 'feasibilityContainer', 'importanceContainer', 'buildContainer'].forEach(id => {
                  if (id !== `${sectionId}Container`) { clearCosmicVisuals(id); }
@@ -1466,21 +1416,18 @@
                  case 'build': completeDysonSwarmVisual(container); break; // Star + Ring + Panels based on build choices
              }
         }
-        /** Removes rings and panels from a specified visual container. */
-        function clearCosmicVisuals(containerId) {
-             const container = document.getElementById(containerId);
+        function clearCosmicVisuals(containerId) { /* ... (no changes) ... */
+            const container = document.getElementById(containerId);
              if (container) { const elementsToRemove = container.querySelectorAll('.cosmic-ring, .cosmic-panel'); elementsToRemove.forEach(el => el.remove()); }
         }
-        /** Adds the rotating cosmic ring visual to a container. */
-        function addCosmicRing(targetContainer) {
-             if (!targetContainer || targetContainer.querySelector('.cosmic-ring')) return; // Don't add if exists
+        function addCosmicRing(targetContainer) { /* ... (no changes) ... */
+            if (!targetContainer || targetContainer.querySelector('.cosmic-ring')) return; // Don't add if exists
              const ring = document.createElement('div'); ring.className = 'cosmic-ring'; targetContainer.appendChild(ring);
              void ring.offsetWidth; // Trigger reflow for animation
              ring.style.opacity = '1'; // Make it visible
         }
-        /** Adds a specified number of orbiting panel visuals to a container. */
-        function addMorePanels(targetContainer, count) {
-             if (!targetContainer) return;
+        function addMorePanels(targetContainer, count) { /* ... (no changes) ... */
+            if (!targetContainer) return;
              if (!targetContainer.querySelector('.cosmic-ring')) { addCosmicRing(targetContainer); } // Ensure ring exists
              const radius = 75; // Orbit radius
              const existingPanels = targetContainer.querySelectorAll('.cosmic-panel').length; // Count existing panels
@@ -1499,9 +1446,8 @@
                  setTimeout(() => { panel.style.opacity = '0.7'; panel.style.transform = `translate(${x}px, ${y}px) rotate(${angle + Math.PI / 2}rad) scale(1)`; }, 50 * i);
              }
         }
-        /** Draws the complete Dyson Swarm visual based on completed build phases. */
-        function completeDysonSwarmVisual(targetContainer) {
-             if (!targetContainer) return;
+        function completeDysonSwarmVisual(targetContainer) { /* ... (no changes) ... */
+            if (!targetContainer) return;
              clearCosmicVisuals(targetContainer.id); // Clear previous visuals
              addCosmicRing(targetContainer); // Add the ring
              // Calculate how many panels to show based on phases completed
@@ -1512,16 +1458,11 @@
              addMorePanels(targetContainer, numPanels); // Add the calculated panels
         }
         // --- Confetti Functions ---
-        let confettiInterval = null; // Variable to control confetti generation
-        /** Starts the confetti animation for 5 seconds. */
-        function startConfetti() { stopConfetti(); createConfettiPiece(); confettiInterval = setInterval(createConfettiPiece, 100); setTimeout(stopConfetti, 5000); }
-        /** Stops the confetti animation and clears pieces. */
-        function stopConfetti() { clearInterval(confettiInterval); confettiInterval = null; setTimeout(() => { if (confettiContainer) confettiContainer.innerHTML = ''; }, 3000); }
-        /** Creates a single piece of falling confetti. */
-        function createConfettiPiece() { if (!confettiContainer) return; const confetti = document.createElement('div'); const randomClass = `c${Math.floor(Math.random() * 5)}`; confetti.className = `confetti ${randomClass}`; confetti.style.left = `${Math.random() * 100}vw`; confetti.style.animationDelay = `${Math.random() * 2}s`; confetti.style.transform = `rotate(${Math.random() * 360}deg)`; confettiContainer.appendChild(confetti); setTimeout(() => { confetti.remove(); }, 7000); } // Remove after animation finishes
+        let confettiInterval = null;
+        function startConfetti() { /* ... (no changes) ... */ stopConfetti(); createConfettiPiece(); confettiInterval = setInterval(createConfettiPiece, 100); setTimeout(stopConfetti, 5000); }
+        function stopConfetti() { /* ... (no changes) ... */ clearInterval(confettiInterval); confettiInterval = null; setTimeout(() => { if (confettiContainer) confettiContainer.innerHTML = ''; }, 3000); }
+        function createConfettiPiece() { /* ... (no changes) ... */ if (!confettiContainer) return; const confetti = document.createElement('div'); const randomClass = `c${Math.floor(Math.random() * 5)}`; confetti.className = `confetti ${randomClass}`; confetti.style.left = `${Math.random() * 100}vw`; confetti.style.animationDelay = `${Math.random() * 2}s`; confetti.style.transform = `rotate(${Math.random() * 360}deg)`; confettiContainer.appendChild(confetti); setTimeout(() => { confetti.remove(); }, 7000); }
 
     </script>
     </body>
 </html>
-
-
