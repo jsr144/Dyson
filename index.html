@@ -136,6 +136,7 @@
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
+            opacity: 0.7; /* Make disabled buttons slightly transparent */
         }
 
         .btn-next { background-color: var(--accent); float: right; }
@@ -439,6 +440,88 @@
             font-size: 0.95rem;
         }
 
+        /* Styles for the Revamped Build Section */
+        .build-choices {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between; /* Space out buttons */
+            margin: 1.5rem 0;
+        }
+
+        .build-choices .btn.build-btn {
+            flex-basis: calc(50% - 1rem); /* Two columns layout */
+            margin-bottom: 1rem;
+            padding: 1rem; /* More padding for description */
+            height: auto; /* Allow button height to adjust */
+            text-align: left; /* Align text left */
+            display: flex; /* Use flexbox for content alignment */
+            flex-direction: column; /* Stack title and description */
+            box-shadow: 0 3px 5px rgba(0,0,0, 0.1); /* Softer shadow */
+            background-color: var(--info); /* Use info color */
+            line-height: 1.4; /* Better spacing for text */
+            border-radius: 15px; /* Less rounded than pill */
+        }
+
+        .build-choices .btn.build-btn:hover {
+            background-color: var(--primary); /* Use primary on hover */
+             transform: translateY(-2px) scale(1.02); /* Subtle hover effect */
+        }
+
+         .build-choices .btn.build-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+            opacity: 0.7;
+         }
+
+
+        .build-choices .btn.build-btn strong {
+            display: block;
+            margin-bottom: 0.5rem; /* Space between title and desc */
+            font-size: 1rem; /* Slightly larger title */
+            color: var(--white); /* Ensure title is white */
+        }
+
+        .choice-desc {
+            font-size: 0.85rem; /* Smaller description text */
+            color: rgba(255, 255, 255, 0.9); /* Lighter text for description */
+        }
+
+        .build-feedback {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border-radius: 10px;
+            background-color: rgba(236, 72, 153, 0.1); /* Light pink background */
+            border-left: 4px solid var(--secondary); /* Pink border */
+            min-height: 50px; /* Ensure space even when empty */
+            transition: background-color 0.3s ease;
+            font-size: 0.95rem;
+        }
+        .build-feedback.success {
+             background-color: rgba(16, 185, 129, 0.1); /* Light green for success */
+             border-left-color: var(--success);
+        }
+        .build-feedback.info {
+             background-color: rgba(59, 130, 246, 0.1); /* Light blue for info */
+             border-left-color: var(--info);
+        }
+
+
+        .build-results {
+            margin-top: 1rem;
+            padding: 0.5rem;
+            background-color: rgba(109, 40, 217, 0.05); /* Very light purple */
+            border-radius: 8px;
+            text-align: center;
+        }
+        .build-results p {
+            margin: 0.3rem 0;
+        }
+        .build-results strong {
+             color: var(--primary);
+        }
+
         /* Keyframe Animations */
         @keyframes pulse {
             0%, 100% { transform: scale(1); }
@@ -472,6 +555,10 @@
             .star { width: 60px; height: 60px; }
             .cosmic-ring { width: 120px; height: 120px; }
             .fun-facts-list { padding-left: 1.5rem; }
+             /* Responsive adjustments for build section */
+            .build-choices .btn.build-btn {
+                flex-basis: 100%; /* Stack buttons vertically on small screens */
+            }
         }
 
     </style>
@@ -504,8 +591,7 @@
                 <li>See what others wondered.</li>
                 <li>Leave a birthday wish for Mary!</li>
             </ul>
-            <p class="resource-counter">Curiosity Points: <span id="resources-intro">100</span></p>
-            <div class="clearfix">
+            <p class="resource-counter">Curiosity Points: <span id="resources-intro">100</span></p> <div class="clearfix">
                 <button class="btn btn-next" onclick="showSection('fun-facts')">See Fun Facts! →</button>
             </div>
         </div>
@@ -548,7 +634,7 @@
             <h2>Could We Build One?</h2>
              <div class="cosmic-sphere-container" id="feasibilityContainer">
                 <div class="star"></div>
-            </div>
+                 </div>
             <p>What's the biggest challenge in building a Dyson Swarm?</p>
             <div class="options" id="feasibility-options">
                 <div class="option" onclick="selectOption(this, 'feasibility', false)">Getting the star's permission.</div>
@@ -567,7 +653,7 @@
             <h2>Why Is It Important?</h2>
              <div class="cosmic-sphere-container" id="importanceContainer">
                 <div class="star"></div>
-            </div>
+                 </div>
             <p>Even if hard to build, why is the Dyson Sphere concept useful?</p>
             <div class="options" id="importance-options">
                 <div class="option" onclick="selectOption(this, 'importance', false)">It's a great space umbrella.</div>
@@ -583,19 +669,42 @@
         </div>
 
         <div class="game-section" id="build">
-            <h2>Build Your Mini Cosmic Structure!</h2>
+            <h2>Mission Control: Dyson Swarm Design</h2>
+            <p>Let's design our Dyson Swarm blueprint! You have <strong id="resources-build-display">100</strong> Design Points to allocate.</p>
+            <p>Choose mission phases to add components and improve efficiency. Each phase adds a crucial part to our plan!</p>
+
             <div class="cosmic-sphere-container" id="buildContainer">
                 <div class="star"></div>
+                </div>
+
+            <div class="build-choices">
+                <button class="btn build-btn" id="btn-phase1" onclick="runMissionPhase('phase1', 25)">
+                    <strong>Phase 1: Deploy Collectors (-25 Pts)</strong>
+                    <span class="choice-desc">Launch basic solar collectors into orbit. Starts gathering energy.</span>
+                </button>
+                <button class="btn build-btn" id="btn-phase2" onclick="runMissionPhase('phase2', 30)">
+                    <strong>Phase 2: Add Power Converters (-30 Pts)</strong>
+                    <span class="choice-desc">Install systems to convert raw sunlight into usable power. Boosts efficiency significantly.</span>
+                </button>
+                <button class="btn build-btn" id="btn-phase3" onclick="runMissionPhase('phase3', 20)">
+                    <strong>Phase 3: Build Relay Stations (-20 Pts)</strong>
+                    <span class="choice-desc">Construct stations to beam collected energy back home (or wherever it's needed!). Improves delivery.</span>
+                </button>
+                <button class="btn build-btn" id="btn-phase4" onclick="runMissionPhase('phase4', 25)">
+                    <strong>Phase 4: Implement Stabilizers (-25 Pts)</strong>
+                    <span class="choice-desc">Add systems to keep the swarm stable and prevent collisions. Increases reliability.</span>
+                </button>
             </div>
-            <p>You have <span id="resources-build-display">100</span> Curiosity Points. Spend them wisely!</p>
-            <div class="options build-options">
-                <button class="btn build-btn" id="btn-satellites" onclick="allocateResources('satellites', 20)">Add Collectors (-20)</button>
-                <button class="btn build-btn" id="btn-energy" onclick="allocateResources('energy', 30)">Improve Energy Capture (-30)</button>
-                <button class="btn build-btn" id="btn-transmission" onclick="allocateResources('transmission', 25)">Better Transmission (-25)</button>
-                <button class="btn build-btn" id="btn-stability" onclick="allocateResources('stability', 35)">Enhance Stability (-35)</button>
+
+            <div class="build-feedback" id="build-feedback">
+                <p>Awaiting your command, Commander!</p>
             </div>
-            <p>Energy Collected: <span id="energy-collected">0</span>%</p>
-            <p class="resource-counter">Points Left: <span id="resources-build">100</span></p>
+
+            <div class="build-results">
+                <p>Blueprint Efficiency: <strong id="energy-collected">0</strong>%</p>
+                <p class="resource-counter">Design Points Left: <strong id="resources-build">100</strong></p>
+            </div>
+
             <div class="clearfix">
                 <button class="btn btn-prev" onclick="showSection('importance')">← Back</button>
                 <button class="btn btn-next" id="build-next" onclick="showSection('share-thoughts')">Share Your Thoughts →</button>
@@ -607,23 +716,23 @@
              <p>Got a cool fact, a burning question, or a wild idea about Dyson Spheres or space energy?</p>
              <p>Add it here for Mary's collection!</p>
              <div class="form-group">
-                <label for="shared-thought">Your Fact, Thought, or Question:</label>
-                <textarea id="shared-thought" placeholder="e.g., A cool fact is... / I wonder about... / What if...?"></textarea>
-                <div class="checkbox-container">
-                    <input type="checkbox" id="shared-fact-check">
-                    <label for="shared-fact-check" class="checkbox-label">This is NOT a verified fact (it's an idea, question, or opinion).</label>
-                </div>
-                <button class="btn btn-submit" id="submit-thought-button" onclick="submitThought()">Add to Collection</button>
+                 <label for="shared-thought">Your Fact, Thought, or Question:</label>
+                 <textarea id="shared-thought" placeholder="e.g., A cool fact is... / I wonder about... / What if...?"></textarea>
+                 <div class="checkbox-container">
+                     <input type="checkbox" id="shared-fact-check">
+                     <label for="shared-fact-check" class="checkbox-label">This is NOT a verified fact (it's an idea, question, or opinion).</label>
+                 </div>
+                 <button class="btn btn-submit" id="submit-thought-button" onclick="submitThought()">Add to Collection</button>
              </div>
               <div class="mary-says">
-                Dyson spheres captivate our imagination as megastructures that could harness the entire energy output of a star, 
-                  representing an engineering feat so advanced it borders on magic while demonstrating how truly vast our technological potential might be. 
-                  This concept naturally leads us to wonder what other cosmic engineering marvels might be possible and what advanced civilizations across the universe 
-                  might have already achieved.
-            </div>
+                 Dyson spheres captivate our imagination as megastructures that could harness the entire energy output of a star,
+                 representing an engineering feat so advanced it borders on magic while demonstrating how truly vast our technological potential might be.
+                 This concept naturally leads us to wonder what other cosmic engineering marvels might be possible and what advanced civilizations across the universe
+                 might have already achieved.
+             </div>
              <div class="clearfix">
-                <button class="btn btn-prev" onclick="showSection('build')">← Back</button>
-                <button class="btn btn-next" onclick="showSection('collected-questions'); populateCollectedQuestions();">See Collected Questions →</button>
+                 <button class="btn btn-prev" onclick="showSection('build')">← Back</button>
+                 <button class="btn btn-next" onclick="showSection('collected-questions'); populateCollectedQuestions();">See Collected Questions →</button>
              </div>
         </div>
 
@@ -636,8 +745,8 @@
                      </ul>
              </div>
              <div class="clearfix">
-                 <button class="btn btn-prev" onclick="showSection('share-thoughts')">← Back</button>
-                 <button class="btn btn-next" onclick="showSection('collected-wishes'); populateCollectedWishes();">See Birthday Wishes →</button>
+                  <button class="btn btn-prev" onclick="showSection('share-thoughts')">← Back</button>
+                  <button class="btn btn-next" onclick="showSection('collected-wishes'); populateCollectedWishes();">See Birthday Wishes →</button>
              </div>
         </div>
 
@@ -647,14 +756,14 @@
              <div class="contributions-wall">
                  <h3>Happy Birthday Wall!</h3>
                  <ul id="collected-wishes-list">
-                     </ul>
+                      </ul>
              </div>
               <div class="mary-says">
-                "Thank you all for the wonderful wishes!" - Mary (probably!)
-            </div>
+                 "Thank you all for the wonderful wishes!" - Mary (probably!)
+             </div>
              <div class="clearfix">
-                 <button class="btn btn-prev" onclick="showSection('collected-questions')">← Back</button>
-                 <button class="btn btn-next" onclick="showSection('conclusion'); finalizeResults();">Final Results & Wish →</button>
+                  <button class="btn btn-prev" onclick="showSection('collected-questions')">← Back</button>
+                  <button class="btn btn-next" onclick="showSection('conclusion'); finalizeResults();">Final Results & Wish →</button>
              </div>
         </div>
 
@@ -662,8 +771,7 @@
             <div class="congrats-container">
                 <h2>Thanks for Exploring, <span id="display-name">Explorer</span>!</h2>
                 <p>Final Fun Points: <span id="final-score">0</span></p>
-                <p>Your Energy Collection: <span id="final-energy">0</span>%</p>
-            </div>
+                <p>Your Blueprint Efficiency: <span id="final-energy">0</span>%</p> </div>
 
             <div class="form-group">
                 <label for="name-input">Your Name (to sign your wish):</label>
@@ -675,24 +783,24 @@
             </div>
 
              <div class="contributions-wall">
-                <h3>Wall of ALL Contributions</h3>
-                <p style="text-align: center; font-size: 0.9em;">Facts, Thoughts & Wishes from Mary's Science Fair:</p>
-                <ul id="fact-wall">
-                    </ul>
-            </div>
-
-            <div class="mary-says">
-                "Science fair is an invitation to follow your curiosity. The point is JOY, so only do this if it feels fun!" - Mary
-            </div>
-
-            <div class="clearfix"> <button class="btn btn-prev" onclick="showSection('collected-wishes')">← Back</button>
+                 <h3>Wall of ALL Contributions</h3>
+                 <p style="text-align: center; font-size: 0.9em;">Facts, Thoughts & Wishes from Mary's Science Fair:</p>
+                 <ul id="fact-wall">
+                      </ul>
              </div>
+
+             <div class="mary-says">
+                 "Science fair is an invitation to follow your curiosity. The point is JOY, so only do this if it feels fun!" - Mary
+             </div>
+
+             <div class="clearfix"> <button class="btn btn-prev" onclick="showSection('collected-wishes')">← Back</button>
+              </div>
         </div>
     </div>
 
     <script>
         // --- Constants ---
-        const LOCAL_STORAGE_KEY = 'cosmicFacts_v2'; // Updated key for new structure
+        const LOCAL_STORAGE_KEY = 'cosmicFacts_v3'; // Updated key for new structure/gameplay
         const MAX_PANELS = 12; // Max panels for visualization
         const DYSON_FUN_FACTS = [
             "A Dyson Sphere aims to capture nearly 100% of a star's energy output.",
@@ -710,32 +818,32 @@
             { text: "Our sun makes enough energy in 1 second for humanity's needs for 500,000 years!", name: "Claude", isFact: true, type: 'fact' },
             { text: "Could Dyson Spheres create artificial habitats inside?", name: "Science Friend", isFact: false, type: 'thought' },
             { text: "What if we connected Dyson Spheres around multiple stars?", name: "Cosmic Explorer", isFact: false, type: 'thought' }
-            // Removed space elevator as it's less directly about Dyson Spheres
         ];
 
         // --- State Variables ---
         let score = 0;
-        let currentResources = 100;
-        let energyCollected = 0;
+        let currentResources = 100; // Renamed to 'Design Points' in UI text, but variable name kept for simplicity
+        let energyCollected = 0; // Represents 'Blueprint Efficiency'
         let userName = "Explorer"; // Default name
+        // Updated buildAllocations to track phases
         let buildAllocations = {
-            satellites: 0, energy: 0, transmission: 0, stability: 0
+            phase1: 0, phase2: 0, phase3: 0, phase4: 0
         };
-        // Keep track of answered questions
+        // Keep track of answered questions and submissions
         let sectionState = {
             'concept': { answered: false },
             'feasibility': { answered: false },
             'importance': { answered: false },
-            'thoughtSubmitted': false, // Track if thought was submitted in the dedicated section
-            'wishSubmitted': false // Track if wish was submitted
+            'thoughtSubmitted': false,
+            'wishSubmitted': false
         };
-        // Store all collected responses/facts/wishes - ** Loaded from localStorage **
-        let collectedEntries = []; // Renamed for clarity
+        // Store all collected responses/facts/wishes - Loaded from localStorage
+        let collectedEntries = [];
 
         // --- DOM Elements (cache them) ---
         const scoreDisplay = document.getElementById('score');
         const progressBar = document.getElementById('progressBar');
-        const factWall = document.getElementById('fact-wall'); // Master list on conclusion page
+        const factWall = document.getElementById('fact-wall');
         const collectedQuestionsList = document.getElementById('collected-questions-list');
         const collectedWishesList = document.getElementById('collected-wishes-list');
         const funFactsList = document.getElementById('fun-facts-list');
@@ -746,9 +854,12 @@
         const displayName = document.getElementById('display-name');
         const finalScoreDisplay = document.getElementById('final-score');
         const finalEnergyDisplay = document.getElementById('final-energy');
-        const resourcesBuildDisplay = document.getElementById('resources-build');
-        const resourcesBuildCounter = document.getElementById('resources-build-display');
-        const energyCollectedDisplay = document.getElementById('energy-collected');
+        // Build section specific elements
+        const resourcesBuildDisplay = document.getElementById('resources-build-display'); // Label above visual
+        const resourcesBuild = document.getElementById('resources-build'); // Counter in results below
+        const energyCollectedDisplay = document.getElementById('energy-collected'); // Efficiency display below
+        const buildFeedback = document.getElementById('build-feedback'); // Feedback box
+        // ---
         const confettiContainer = document.getElementById('confettiContainer');
         const submitThoughtButton = document.getElementById('submit-thought-button');
         const submitWishButton = document.getElementById('submit-wish-button');
@@ -760,19 +871,19 @@
             if (storedEntries) {
                 try {
                     const parsedEntries = JSON.parse(storedEntries);
-                    // Basic validation: check if it's an array and items have expected structure
+                    // Basic validation
                     if (Array.isArray(parsedEntries) && parsedEntries.every(e => typeof e.text === 'string' && typeof e.name === 'string' && typeof e.isFact === 'boolean' && typeof e.type === 'string')) {
                         return parsedEntries;
                     } else {
                         console.warn("Stored data format mismatch or invalid. Resetting to defaults.");
-                        return [...STARTER_ENTRIES]; // Use spread to create a copy
+                        return [...STARTER_ENTRIES];
                     }
                 } catch (error) {
                     console.error("Error parsing stored entries:", error, "Resetting to defaults.");
-                    return [...STARTER_ENTRIES]; // Use spread to create a copy
+                    return [...STARTER_ENTRIES];
                 }
             }
-            return [...STARTER_ENTRIES]; // Use spread to create a copy
+            return [...STARTER_ENTRIES];
         }
 
         function saveEntriesToStorage() {
@@ -780,7 +891,6 @@
                 localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(collectedEntries));
             } catch (error) {
                  console.error("Error saving entries to localStorage:", error);
-                 // Optionally alert the user or handle the error
                  alert("Could not save your progress. Local storage might be full or disabled.");
             }
         }
@@ -793,11 +903,12 @@
         // --- Initial Setup ---
         window.onload = function() {
             collectedEntries = loadEntriesFromStorage();
-            saveEntriesToStorage(); // Ensure defaults or loaded data is saved back (handles migration if needed)
+            saveEntriesToStorage(); // Ensure defaults or loaded data is saved back
             populateFunFacts();
-            populateFactWall(); // Populate the main wall on load (might be empty initially)
+            populateFactWall(); // Populate the main wall on load
             updateScoreDisplay();
-            updateBuildResourcesDisplay();
+            updateBuildResourcesDisplay(); // Initialize build section displays
+            updateEnergyCollectedDisplay();
             showSection('intro'); // Start at the intro
         };
 
@@ -814,13 +925,12 @@
 
         function populateFactWall() {
             factWall.innerHTML = ''; // Clear existing
-            // Display in reverse order of storage (newest first)
             collectedEntries.forEach(entry => addEntryToWall(factWall, entry));
         }
 
         function populateCollectedQuestions() {
              collectedQuestionsList.innerHTML = ''; // Clear existing
-             const questionsAndThoughts = collectedEntries.filter(entry => entry.type === 'thought'); // Show all thoughts/questions
+             const questionsAndThoughts = collectedEntries.filter(entry => entry.type === 'thought');
              questionsAndThoughts.forEach(entry => addEntryToWall(collectedQuestionsList, entry));
         }
 
@@ -860,18 +970,25 @@
                 return;
             }
 
-            // Updated section order for progress bar calculation
+             // Clear build feedback when leaving the build section or entering it
+             if (buildFeedback) {
+                buildFeedback.innerHTML = '<p>Awaiting your command, Commander!</p>';
+                buildFeedback.className = 'build-feedback'; // Reset style
+             }
+
             const sections = ['intro', 'fun-facts', 'concept', 'feasibility', 'importance', 'build', 'share-thoughts', 'collected-questions', 'collected-wishes', 'conclusion'];
             const currentIndex = sections.indexOf(sectionId);
             const progressPercent = (currentIndex / (sections.length - 1)) * 100;
             progressBar.style.width = progressPercent + '%';
 
             // Update visuals or data specific to the section
-            updateCosmicVisuals(sectionId);
+            updateCosmicVisuals(sectionId); // Handles visuals for concept, feasibility, importance, build
 
             if (sectionId === 'build') {
-                updateBuildResourcesDisplay();
-                updateBuildButtons();
+                updateBuildResourcesDisplay(); // Ensure points display is correct
+                updateBuildButtons();          // Ensure button states are correct
+                updateEnergyCollectedDisplay(); // Ensure efficiency display is correct
+                // Visual update handled by updateCosmicVisuals call above
             }
             if (sectionId === 'collected-questions') {
                  populateCollectedQuestions();
@@ -880,7 +997,7 @@
                  populateCollectedWishes();
             }
              if (sectionId === 'conclusion') {
-                finalizeResults(); // Ensure final results are calculated and main wall populated
+                 finalizeResults();
             }
         }
 
@@ -890,24 +1007,114 @@
             setTimeout(() => scoreDisplay.classList.remove('resource-animation'), 500);
         }
 
+        // --- Build Section Specific Functions (NEW/MODIFIED) ---
+
         function updateBuildResourcesDisplay() {
-            resourcesBuildDisplay.textContent = currentResources;
-            resourcesBuildCounter.textContent = currentResources;
-            resourcesBuildDisplay.classList.add('resource-animation');
-            setTimeout(() => resourcesBuildDisplay.classList.remove('resource-animation'), 500);
+            // Update both the label and the counter in the results area
+            const pointsText = currentResources;
+            if(resourcesBuildDisplay) resourcesBuildDisplay.textContent = pointsText; // Update label above
+            if(resourcesBuild) resourcesBuild.textContent = pointsText; // Update counter below
+            // Animate the counter
+            if(resourcesBuild) {
+                resourcesBuild.classList.add('resource-animation');
+                setTimeout(() => resourcesBuild.classList.remove('resource-animation'), 500);
+            }
         }
 
         function updateEnergyCollectedDisplay() {
-            let calculatedEnergy = Math.min(100,
-                (buildAllocations.satellites * 3) +
-                (buildAllocations.energy * 5) +
-                (buildAllocations.transmission * 2) +
-                (buildAllocations.stability * 1)
-            );
+            // Slightly adjusted calculation for more impact from phases
+            // Max efficiency capped at 100%
+             let calculatedEnergy = Math.min(100,
+                 (buildAllocations.phase1 * 10) + // Collectors provide base gathering
+                 (buildAllocations.phase2 * 25) + // Converters significantly boost usable energy
+                 (buildAllocations.phase3 * 8) + // Relays help slightly with overall efficiency
+                 (buildAllocations.phase4 * 5)   // Stabilizers add a small reliability bonus
+             );
             energyCollected = Math.round(calculatedEnergy);
-            energyCollectedDisplay.textContent = energyCollected + '%';
+            if(energyCollectedDisplay) energyCollectedDisplay.textContent = energyCollected; // Just the number, % is in HTML
         }
 
+        // NEW Function: runMissionPhase
+        function runMissionPhase(phase, cost) {
+             if (currentResources >= cost) {
+                currentResources -= cost;
+                buildAllocations[phase] = (buildAllocations[phase] || 0) + 1; // Increment phase count
+
+                // Update Displays
+                updateBuildResourcesDisplay();
+                updateEnergyCollectedDisplay();
+                updateBuildButtons(); // Disable buttons if needed
+
+                // Give Feedback
+                let feedbackMsg = "";
+                buildFeedback.className = 'build-feedback success'; // Default to success style
+                let panelsToAdd = 0;
+                let pointsEarned = 0;
+
+                switch (phase) {
+                    case 'phase1':
+                        feedbackMsg = `<strong>Phase 1 Complete!</strong> Basic collector swarm deployed. We're gathering sunlight! <span class="sparkle">☀️</span>`;
+                        panelsToAdd = 1;
+                        pointsEarned = 5;
+                        break;
+                    case 'phase2':
+                        feedbackMsg = `<strong>Phase 2 Complete!</strong> Power converters online. Usable energy output increased significantly! <span class="sparkle">⚡</span>`;
+                        panelsToAdd = 2; // More visual impact
+                        pointsEarned = 8;
+                        break;
+                    case 'phase3':
+                        feedbackMsg = `<strong>Phase 3 Complete!</strong> Relay stations active. Power transmission pathways established! <span class="sparkle">📡</span>`;
+                         panelsToAdd = 1;
+                         pointsEarned = 4;
+                        break;
+                    case 'phase4':
+                        feedbackMsg = `<strong>Phase 4 Complete!</strong> Orbit stabilizers engaged. The swarm is more stable and reliable! <span class="sparkle">🛡️</span>`;
+                         panelsToAdd = 1;
+                         pointsEarned = 6;
+                        break;
+                 }
+                 buildFeedback.innerHTML = `<p>${feedbackMsg}</p>`;
+                 addPanelToVisual(panelsToAdd); // Add visual panels
+                 score += pointsEarned; // Award points
+                 updateScoreDisplay();
+
+             } else {
+                 buildFeedback.innerHTML = "<p>Mission Control reports insufficient Design Points for that phase!</p>";
+                 buildFeedback.className = 'build-feedback info'; // Use info style for this message
+             }
+        }
+
+        function updateBuildButtons() {
+            // Now checks buttons based on their ID and associated cost from the HTML onclick
+            document.querySelectorAll('.build-choices .build-btn').forEach(button => {
+                const onclickAttr = button.getAttribute('onclick');
+                // Basic parsing to find the cost argument in runMissionPhase('phase', cost)
+                const match = onclickAttr?.match(/runMissionPhase\('[^']+',\s*(\d+)\)/);
+                if (match && match[1]) {
+                    const cost = parseInt(match[1]);
+                    button.disabled = currentResources < cost;
+                } else {
+                     button.disabled = false; // Fallback
+                     console.warn("Could not determine cost for button:", button.id);
+                }
+            });
+        }
+
+        // Modified addPanelToVisual to accept a count
+        function addPanelToVisual(count = 1) { // Default to adding 1 panel
+            const container = document.getElementById('buildContainer');
+            if (!container) return;
+            const panelCount = container.querySelectorAll('.cosmic-panel').length;
+             if (panelCount >= MAX_PANELS) return; // Don't add more than max
+
+            const panelsToAdd = Math.min(count, MAX_PANELS - panelCount); // Don't exceed MAX_PANELS
+            addMorePanels(container, panelsToAdd); // Use the generalized function
+        }
+
+        // --- End of Build Section Specific Functions ---
+
+
+        // --- Quiz and Submission Functions (Mostly Unchanged) ---
 
         function selectOption(element, questionId, isCorrect) {
             if (sectionState[questionId].answered) return;
@@ -915,7 +1122,6 @@
 
             const feedbackElement = document.getElementById(`${questionId}-feedback`);
             const optionsContainer = document.getElementById(`${questionId}-options`);
-            // Response form is removed, so no need to show it
             const nextButton = document.getElementById(`${questionId}-next`);
 
             optionsContainer.querySelectorAll('.option').forEach(opt => {
@@ -927,12 +1133,12 @@
             element.classList.add('selected'); // Highlight the selected option
 
             if (isCorrect) {
-                score += 10; // Award points for correct answer
+                score += 10;
                 element.classList.add('correct');
                 feedbackElement.innerHTML = `<p><strong>Correct!</strong> ${getFeedbackText(questionId, true)}</p>`;
                 feedbackElement.className = 'feedback correct';
             } else {
-                score += 2; // Award fewer points for incorrect answer
+                score += 2;
                 element.classList.add('incorrect');
                 feedbackElement.innerHTML = `<p><strong>Not quite!</strong> ${getFeedbackText(questionId, false)}</p>`;
                 feedbackElement.className = 'feedback incorrect';
@@ -940,14 +1146,13 @@
                 optionsContainer.querySelectorAll('.option').forEach(opt => {
                     const onclickAttr = opt.getAttribute('onclick');
                     if (onclickAttr && onclickAttr.includes(', true)')) {
-                        opt.classList.add('correct'); // Show the correct one
-                        opt.style.opacity = '1'; // Ensure it's fully visible
+                        opt.classList.add('correct');
+                        opt.style.opacity = '1';
                     }
                 });
             }
 
             updateScoreDisplay();
-            // responseForm.style.display = 'block'; // No longer needed
             nextButton.style.display = 'inline-block'; // Show the next button
         }
 
@@ -960,7 +1165,6 @@
             }
         }
 
-        // Renamed from submitResponse - this is specifically for thoughts/facts/questions
         function submitThought() {
              const thoughtText = sharedThoughtInput.value.trim();
              const isNotFact = sharedFactCheck.checked;
@@ -975,21 +1179,17 @@
                  };
 
                  collectedEntries.unshift(newEntry); // Add to start of array
-                 // Add visually to the main wall immediately (will also appear on collected questions page later)
-                 addEntryToWall(factWall, newEntry);
+                 addEntryToWall(factWall, newEntry); // Add visually to the main wall immediately
                  saveEntriesToStorage(); // Save updated array
 
                  sharedThoughtInput.value = ''; // Clear input
                  sharedFactCheck.checked = false;
                  sectionState.thoughtSubmitted = true; // Mark as submitted for this session
 
-                 // Provide feedback on the button
                  const originalText = submitThoughtButton.textContent;
                  submitThoughtButton.textContent = 'Added!';
-                 // submitThoughtButton.disabled = true; // Allow multiple submissions if desired
                  setTimeout(() => {
                      submitThoughtButton.textContent = originalText;
-                     // submitThoughtButton.disabled = false;
                  }, 1500);
 
                  score += 5; // Award points for contribution
@@ -997,43 +1197,8 @@
              } else {
                  alert("Please share a thought or fact first!");
              }
-         }
-
-        function addFactToWall(text, name, isFact) { /* This function is superseded by addEntryToWall, can be removed if no longer called */
-            const li = document.createElement('li');
-            li.innerHTML = `${text} <span class="fact-attribution">- ${name} ${isFact ? '(Fact)' : '(Thought/Idea)'}</span>`;
-             if (!isFact) li.classList.add('not-fact');
-            factWall.insertBefore(li, factWall.firstChild); // Prepend
         }
 
-        function allocateResources(type, cost) {
-            if (currentResources >= cost) {
-                currentResources -= cost;
-                buildAllocations[type]++;
-                updateBuildResourcesDisplay();
-                updateEnergyCollectedDisplay();
-                updateBuildButtons();
-                addPanelToVisual(); // Add visual element
-                score += Math.round(cost / 5); // Award points based on cost
-                updateScoreDisplay();
-            } else {
-                alert("Not enough Curiosity Points!");
-            }
-        }
-
-        function updateBuildButtons() {
-            document.querySelectorAll('.build-btn').forEach(button => {
-                const costText = button.textContent.match(/-(\d+)/);
-                if (costText && costText[1]) {
-                    const cost = parseInt(costText[1]);
-                    button.disabled = currentResources < cost;
-                } else {
-                    button.disabled = false; // Enable if cost not found (shouldn't happen)
-                }
-            });
-        }
-
-        // Renamed from submitFinalThought - this is specifically for birthday wishes
         function submitBirthdayWish() {
              if (sectionState.wishSubmitted) {
                  alert("You've already submitted your wish!");
@@ -1070,18 +1235,17 @@
              birthdayWishInput.value = ''; // Clear the input field
              sectionState.wishSubmitted = true; // Mark wish as submitted for this session
 
-             // Update button state
              submitWishButton.textContent = "Wish Submitted!";
              submitWishButton.disabled = true;
 
              score += 10; // Bonus points for birthday wish!
              updateScoreDisplay();
              startConfetti(); // Celebrate!
-         }
+        }
 
         function finalizeResults() {
             finalScoreDisplay.textContent = score;
-            finalEnergyDisplay.textContent = energyCollected + '%';
+            finalEnergyDisplay.textContent = energyCollected; // Display the final efficiency
             displayName.textContent = nameInput.value.trim() || userName;
             populateFactWall(); // Ensure the main wall on the conclusion page is fully up-to-date
         }
@@ -1094,9 +1258,9 @@
             currentResources = 100;
             energyCollected = 0;
             userName = "Explorer";
-            buildAllocations = { satellites: 0, energy: 0, transmission: 0, stability: 0 };
-            collectedEntries = [...STARTER_ENTRIES]; // Reset to starter entries (create a copy)
-            saveEntriesToStorage(); // Save the reset state
+            buildAllocations = { phase1: 0, phase2: 0, phase3: 0, phase4: 0 }; // Reset allocations
+            collectedEntries = [...STARTER_ENTRIES];
+            saveEntriesToStorage();
 
             // Reset section-specific states
             sectionState = {
@@ -1119,38 +1283,47 @@
 
             // Reset question sections UI
             ['concept', 'feasibility', 'importance'].forEach(id => {
-                document.getElementById(`${id}-feedback`).style.display = 'none';
-                document.getElementById(`${id}-feedback`).innerHTML = '';
-                document.getElementById(`${id}-next`).style.display = 'none';
-
+                const feedbackEl = document.getElementById(`${id}-feedback`);
+                const nextBtn = document.getElementById(`${id}-next`);
                 const optionsContainer = document.getElementById(`${id}-options`);
-                optionsContainer.querySelectorAll('.option').forEach(opt => {
-                    opt.classList.remove('selected', 'correct', 'incorrect', 'disabled');
-                    opt.style.opacity = '1';
-                     // Re-attach onclick handlers - IMPORTANT
-                     const onclickAttr = opt.getAttribute('onclick');
-                     // Basic parsing, might need adjustment if format changes
-                     const match = onclickAttr?.match(/selectOption\(this,\s*'([^']*)',\s*(true|false)\)/);
-                     if (match) {
-                        const questionId = match[1];
-                        const isCorrect = match[2] === 'true';
-                        opt.onclick = () => selectOption(opt, questionId, isCorrect);
-                     } else {
-                         console.warn("Could not re-attach onclick for option:", opt);
-                     }
-                });
+
+                if(feedbackEl) {
+                    feedbackEl.style.display = 'none';
+                    feedbackEl.innerHTML = '';
+                }
+                 if(nextBtn) nextBtn.style.display = 'none';
+
+                if(optionsContainer) {
+                    optionsContainer.querySelectorAll('.option').forEach(opt => {
+                        opt.classList.remove('selected', 'correct', 'incorrect', 'disabled');
+                        opt.style.opacity = '1';
+                        // Re-attach onclick handlers
+                        const onclickAttr = opt.getAttribute('onclick');
+                        const match = onclickAttr?.match(/selectOption\(this,\s*'([^']*)',\s*(true|false)\)/);
+                        if (match) {
+                            const questionId = match[1];
+                            const isCorrect = match[2] === 'true';
+                            opt.onclick = () => selectOption(opt, questionId, isCorrect);
+                        } else {
+                            console.warn("Could not re-attach onclick for option:", opt);
+                        }
+                    });
+                }
             });
 
-            // Reset build section UI
-            updateBuildButtons();
-            clearCosmicVisuals('buildContainer'); // Clear panels from build visual
-            updateCosmicVisuals('build'); // Re-initialize build visual (star only)
+            // Reset Build Section UI
+            updateBuildButtons(); // Re-enable buttons based on initial resources
+            if (buildFeedback) { // Clear feedback message
+                 buildFeedback.innerHTML = '<p>Awaiting your command, Commander!</p>';
+                 buildFeedback.className = 'build-feedback';
+            }
+             clearCosmicVisuals('buildContainer'); // Clear panels from build visual
+             updateCosmicVisuals('build'); // Re-initialize build visual (star only)
 
             // Reset thought/wish submission buttons
             submitThoughtButton.textContent = 'Add to Collection';
-            // submitThoughtButton.disabled = false; // Re-enable if multiple allowed
             submitWishButton.textContent = 'Add Your Wish & Celebrate!';
-            submitWishButton.disabled = false; // Re-enable wish button
+            submitWishButton.disabled = false;
 
             // Clear dynamic lists
             factWall.innerHTML = '';
@@ -1158,40 +1331,30 @@
             collectedWishesList.innerHTML = '';
 
             // Refresh Wall and Start Over
-            populateFactWall(); // Repopulate main wall with starter entries
+            populateFactWall();
             stopConfetti();
-            showSection('intro'); // Go back to the first section
+            showSection('intro');
         }
 
-        // --- Mailto Function ---
+        // --- Mailto Function (Optional - can be uncommented if needed) ---
+        /*
         function generateMailtoLink() {
-            // ###############################################################
-            // #                                                             #
-            // #    !!!   IMPORTANT: YOU MUST EDIT THIS LINE BELOW   !!!     #
-            // #                                                             #
-            // # Replace "YOUR_EMAIL_ADDRESS_HERE@example.com" with the      #
-            // # actual email address where you want the results sent.       #
-            // # Otherwise, the 'Email Results' button won't work correctly. #
-            // #                                                             #
-            // ###############################################################
+            // IMPORTANT: Replace "YOUR_EMAIL_ADDRESS_HERE@example.com"
             const recipientEmail = "jessesrothman@gmail.com"; // <<< EDIT THIS EMAIL ADDRESS
 
-            // --- Gather data ---
             const finalName = nameInput.value.trim() || userName;
             const finalScore = score;
             const finalEnergy = energyCollected;
             const currentEntries = loadEntriesFromStorage(); // Load fresh data
 
-            // --- Format email body ---
             let emailBody = `Cosmic Curiosity Results for Mary!\n`;
             emailBody += `Submitted by: ${finalName}\n\n`;
             emailBody += `Final Fun Points: ${finalScore}\n`;
-            emailBody += `Energy Collection: ${finalEnergy}%\n\n`;
+            emailBody += `Blueprint Efficiency: ${finalEnergy}%\n\n`; // Updated label
             emailBody += `--- All Contributions ---\n\n`;
 
             if (currentEntries.length > 0) {
-                // Display oldest first in email for chronological order
-                for (let i = currentEntries.length - 1; i >= 0; i--) {
+                for (let i = currentEntries.length - 1; i >= 0; i--) { // Oldest first
                     const entry = currentEntries[i];
                     emailBody += `"${entry.text}" - ${entry.name} (${getEntryTypeLabel(entry)})\n\n`;
                 }
@@ -1199,32 +1362,24 @@
                 emailBody += "(No facts, thoughts, or wishes were submitted)\n";
             }
 
-            // --- Format subject ---
             const emailSubject = `Cosmic Curiosity Results from ${finalName}`;
-
-            // --- Encode components for URL ---
             const encodedSubject = encodeURIComponent(emailSubject);
             const encodedBody = encodeURIComponent(emailBody);
-
-            // --- Construct mailto link ---
             const mailtoLink = `mailto:${recipientEmail}?subject=${encodedSubject}&body=${encodedBody}`;
 
-            // --- Check length (optional but good practice) ---
-            const MAX_MAILTO_LENGTH = 2000; // Common limit, can vary
+            const MAX_MAILTO_LENGTH = 2000;
             if (mailtoLink.length > MAX_MAILTO_LENGTH) {
-                alert("Warning: The collected results are very long and might exceed email link limits. The email draft might be incomplete or fail to open.");
+                alert("Warning: The collected results are very long and might exceed email link limits.");
             }
 
-            // --- Open email client ---
-            // Note: This relies on the user having a default email client configured.
-            // It opens a DRAFT email; the user MUST click 'Send'.
             try {
                  window.location.href = mailtoLink;
             } catch (e) {
                  console.error("Failed to open mailto link:", e);
-                 alert("Could not open your email app automatically. Please check your browser settings or copy the results manually.");
+                 alert("Could not open your email app automatically.");
             }
         }
+        */
 
 
         // --- Visual Effect Functions ---
@@ -1262,9 +1417,8 @@
                      // Re-create the visual based on current buildAllocations
                      completeDysonSwarmVisual(container);
                      break;
-                 // Add cases for other sections if they need specific visuals
              }
-         }
+        }
 
         function clearCosmicVisuals(containerId) {
              const container = document.getElementById(containerId);
@@ -1273,17 +1427,16 @@
                  const elementsToRemove = container.querySelectorAll('.cosmic-ring, .cosmic-panel');
                  elementsToRemove.forEach(el => el.remove());
              }
-         }
+        }
 
         function addCosmicRing(targetContainer) {
              if (!targetContainer || targetContainer.querySelector('.cosmic-ring')) return; // Don't add if exists
-             // clearCosmicVisuals(targetContainer.id); // Clear previous panels/rings first
              const ring = document.createElement('div');
              ring.className = 'cosmic-ring';
              targetContainer.appendChild(ring);
              void ring.offsetWidth; // Trigger reflow for animation
              ring.style.opacity = '1'; // Make it visible
-         }
+        }
 
         function addMorePanels(targetContainer, count) {
             if (!targetContainer) return;
@@ -1294,6 +1447,8 @@
             const existingPanels = targetContainer.querySelectorAll('.cosmic-panel').length;
 
             for (let i = 0; i < count; i++) {
+                 if (existingPanels + i >= MAX_PANELS) break; // Stop if max panels reached
+
                 const panelIndex = existingPanels + i;
                  // Distribute panels somewhat evenly, allowing for MAX_PANELS total
                 const angle = (panelIndex / Math.max(1, MAX_PANELS)) * 2 * Math.PI + (Math.random() * 0.3 - 0.15); // Add slight randomness
@@ -1309,22 +1464,11 @@
                 targetContainer.appendChild(panel);
 
                  // Animate appearance
-                 // Use setTimeout to ensure the element is in the DOM before starting transition
                  setTimeout(() => {
                      panel.style.opacity = '0.7';
                      panel.style.transform = `translate(${x}px, ${y}px) rotate(${angle + Math.PI / 2}rad) scale(1)`;
                  }, 50 * i); // Stagger appearance slightly
             }
-         }
-
-        // Used specifically in the 'build' section when spending points
-        function addPanelToVisual() {
-            const container = document.getElementById('buildContainer');
-            if (!container) return;
-            const panelCount = container.querySelectorAll('.cosmic-panel').length;
-            if (panelCount >= MAX_PANELS) return; // Don't add more than max
-
-            addMorePanels(container, 1); // Use the generalized function to add one panel
         }
 
         // Used to draw the state of the swarm in the 'build' section
@@ -1333,23 +1477,23 @@
             clearCosmicVisuals(targetContainer.id); // Clear existing panels/rings first
             addCosmicRing(targetContainer); // Add the ring
 
-            // Calculate how many panels to show based on resources spent
-            // This logic can be adjusted for desired visual density
-            const totalCostUnits = (buildAllocations.satellites * 20) +
-                                   (buildAllocations.energy * 30) +
-                                   (buildAllocations.transmission * 25) +
-                                   (buildAllocations.stability * 35);
-            // Example scaling: 1 panel per ~25 points spent, up to MAX_PANELS
-            const numPanels = Math.min(MAX_PANELS, Math.floor(totalCostUnits / 25));
+            // Calculate how many panels to show based on phases completed
+            // Give more visual weight to collectors and converters
+            const numPanels = Math.min(MAX_PANELS,
+                 (buildAllocations.phase1 * 2) + // 2 panels per collector phase
+                 (buildAllocations.phase2 * 3) + // 3 panels per converter phase
+                 (buildAllocations.phase3 * 1) + // 1 panel per relay phase
+                 (buildAllocations.phase4 * 1)   // 1 panel per stabilizer phase
+             );
 
             addMorePanels(targetContainer, numPanels); // Add the calculated number of panels
         }
 
         // --- Confetti Functions ---
         let confettiInterval = null;
-        function startConfetti() { stopConfetti(); /* Clear existing timers/elements */ createConfettiPiece(); /* Create one immediately */ confettiInterval = setInterval(createConfettiPiece, 100); /* Create more over time */ setTimeout(stopConfetti, 5000); /* Automatically stop after 5 seconds */ }
-        function stopConfetti() { clearInterval(confettiInterval); confettiInterval = null; /* Clear interval */ /* Optionally remove remaining confetti slowly */ setTimeout(() => { if (confettiContainer) confettiContainer.innerHTML = ''; }, 3000); }
-        function createConfettiPiece() { if (!confettiContainer) return; const confetti = document.createElement('div'); const randomClass = `c${Math.floor(Math.random() * 5)}`; confetti.className = `confetti ${randomClass}`; confetti.style.left = `${Math.random() * 100}vw`; confetti.style.animationDelay = `${Math.random() * 2}s`; confetti.style.transform = `rotate(${Math.random() * 360}deg)`; confettiContainer.appendChild(confetti); /* Remove confetti element after animation finishes (5s max duration + delay) */ setTimeout(() => { confetti.remove(); }, 7000); }
+        function startConfetti() { stopConfetti(); createConfettiPiece(); confettiInterval = setInterval(createConfettiPiece, 100); setTimeout(stopConfetti, 5000); }
+        function stopConfetti() { clearInterval(confettiInterval); confettiInterval = null; setTimeout(() => { if (confettiContainer) confettiContainer.innerHTML = ''; }, 3000); }
+        function createConfettiPiece() { if (!confettiContainer) return; const confetti = document.createElement('div'); const randomClass = `c${Math.floor(Math.random() * 5)}`; confetti.className = `confetti ${randomClass}`; confetti.style.left = `${Math.random() * 100}vw`; confetti.style.animationDelay = `${Math.random() * 2}s`; confetti.style.transform = `rotate(${Math.random() * 360}deg)`; confettiContainer.appendChild(confetti); setTimeout(() => { confetti.remove(); }, 7000); }
 
     </script>
 </body>
