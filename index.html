@@ -1290,7 +1290,7 @@
          */
         async function submitBirthdayWish() {
             // --- Safety check: Ensure the backend URL is configured ---
-            if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL === 'YOUR_NEW_DEPLOYMENT_URL_HERE') {
+            if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL === ''https://script.google.com/macros/s/AKfycbwXohgrElA2ImjfAxK4eUvtgHxZuuoqWuFgCdbmTvBE35pgDA3XwtIeX91PE2iSCvi2/exec'') {
                  console.error("Google Apps Script URL is not set!");
                  alert("Error: Cannot save results, backend connection not configured.");
                  saveFeedback.textContent = 'Error: Backend connection not configured.';
